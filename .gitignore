@@ -66,9 +66,6 @@ __pycache__/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Versão do Python (pyenv)
-.python-version
-
 # __pypackages__ (PEP 582)
 __pypackages__/
 
