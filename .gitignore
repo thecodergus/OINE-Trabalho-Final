@@ -1,0 +1,337 @@
+# ================================================================================
+# ARQUIVO .GITIGNORE PARA PROJETO PYTHON COM UV, PYTHON 3.13 E ARCADE
+# ================================================================================
+# Gerado automaticamente para cobrir todas as necessidades de desenvolvimento
+# sem necessidade de ajustes manuais durante o processo de desenvolvimento
+#
+# Estrutura:
+# 1. Ambientes Virtuais e Gerenciadores de Pacotes
+# 2. Python: Bytecode, Cache e Arquivos Temporários
+# 3. Build, Distribuição e Empacotamento
+# 4. Testes, Coverage e Ferramentas de Desenvolvimento
+# 5. Desenvolvimento de Jogos: Arcade e Dependências
+# 6. IDEs e Editores
+# 7. Sistemas Operacionais
+# 8. Logs, Dados e Arquivos Temporários
+# ================================================================================
+
+# ================================================================================
+# 1. AMBIENTES VIRTUAIS E GERENCIADORES DE PACOTES
+# ================================================================================
+
+# uv - Ambiente virtual (SEMPRE ignorar)
+.venv/
+
+# Outros ambientes virtuais possíveis
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.env
+
+# Diretórios internos do uv
+.uv/
+
+# Outros gerenciadores de pacotes (caso usados em paralelo)
+# PDM
+.pdm.toml
+.pdm-python
+.pdm-build/
+
+# Poetry
+poetry.lock
+
+# Pipenv
+Pipfile.lock
+
+# pip-tools
+requirements*.txt.lock
+
+# ================================================================================
+# 2. PYTHON: BYTECODE, CACHE E ARQUIVOS TEMPORÁRIOS
+# ================================================================================
+
+# Bytecode compilado / otimizado / arquivos DLL
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Extensões C
+*.so
+*.dll
+*.dylib
+
+# Arquivos de instalação pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Versão do Python (pyenv)
+.python-version
+
+# __pypackages__ (PEP 582)
+__pypackages__/
+
+# ================================================================================
+# 3. BUILD, DISTRIBUIÇÃO E EMPACOTAMENTO
+# ================================================================================
+
+# Distribuição / empacotamento
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller - geralmente escritos por script Python antes do build
+*.manifest
+*.spec
+
+# ================================================================================
+# 4. TESTES, COVERAGE E FERRAMENTAS DE DESENVOLVIMENTO
+# ================================================================================
+
+# Testes e coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Linters e formatters
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+
+# Pyre type checker
+.pyre/
+
+# Pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# ================================================================================
+# 5. DESENVOLVIMENTO DE JOGOS: ARCADE E DEPENDÊNCIAS
+# ================================================================================
+
+# Cache de recursos gráficos e texturas (Arcade/OpenGL)
+.cache/
+cache/
+assets/cache/
+assets/tmp/
+assets/temp/
+assets/.cache/
+assets/*.tmp
+assets/*.bak
+assets/*.old
+
+# Logs de performance e debug de jogos
+logs/
+*.log
+performance.log
+debug.log
+game.log
+
+# Arquivos temporários de desenvolvimento de jogos
+temp/
+tmp/
+*.tmp
+*.bak
+*.old
+*.save
+*.swp
+*.swo
+
+# Arquivos de configuração temporários de engines/editores
+*.json.bak
+*.tmx.bak
+*.tsx.bak
+
+# Build de assets (se houver pipeline de build)
+assets/build/
+assets/dist/
+processed_assets/
+
+# ================================================================================
+# 6. IDES E EDITORES
+# ================================================================================
+
+# Visual Studio Code
+.vscode/
+.history/
+
+# PyCharm
+.idea/
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+.emacs.desktop
+.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# ================================================================================
+# 7. SISTEMAS OPERACIONAIS
+# ================================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Diretórios criados pelo macOS
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
+
+# ================================================================================
+# 8. LOGS, DADOS E ARQUIVOS TEMPORÁRIOS
+# ================================================================================
+
+# Logs gerais
+*.log
+logs/
+log/
+
+# Bancos de dados locais
+*.sqlite3
+*.sqlite3-journal
+*.db
+*.db-journal
+
+# Arquivos de dados e datasets (ajustar conforme necessário)
+data/
+datasets/
+*.csv
+*.xlsx
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+
+# Uploads e arquivos de usuário
+uploads/
+user_data/
+temp_files/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+profile_default/
+ipython_config.py
+
+# MLflow e tracking de experimentos
+mlruns/
+.mlflow/
+
+# Documentação gerada
+docs/_build/
+.readthedocs.yml
+site/
+
+# Arquivos de lock e PID
+*.pid
+*.pid.lock
+*.lock
+
+# Arquivos de configuração sensíveis (variáveis de ambiente)
+.env.local
+.env.development
+.env.test
+.env.production
+config.local.*
+
+# Arquivos de backup
+*.backup
+*~
+
+# ================================================================================
+# NOTAS IMPORTANTES:
+# ================================================================================
+# 
+# ✅ VERSIONADO (não ignorar):
+#   - uv.lock (lockfile para reprodutibilidade)
+#   - pyproject.toml (configuração do projeto)
+#   - Assets originais (imagens, sons, mapas)
+#   - Código fonte (.py)
+#   - Documentação (README.md, docs/)
+#   - Testes (tests/)
+# 
+# ❌ IGNORADO (este arquivo):
+#   - .venv/ (ambiente virtual)
+#   - __pycache__/ (cache Python)
+#   - build/, dist/ (arquivos de build)
+#   - logs/, *.log (logs de execução)
+#   - .cache/ (caches diversos)
+#   - Configurações de IDE (.vscode/, .idea/)
+# 
+# 📝 Personalização:
+#   Se seu projeto gerar arquivos específicos não cobertos aqui,
+#   adicione-os nas seções apropriadas mantendo a organização.
+# ================================================================================

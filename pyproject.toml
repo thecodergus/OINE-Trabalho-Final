@@ -1,0 +1,15 @@
+[project]
+name = "trabalho-final"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "arcade>=3.3.3",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.11.0",
+    "pytest>=9.0.1",
+]
