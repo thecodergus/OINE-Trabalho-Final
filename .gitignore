@@ -332,3 +332,4 @@ config.local.*
 #   Se seu projeto gerar arquivos específicos não cobertos aqui,
 #   adicione-os nas seções apropriadas mantendo a organização.
 # ================================================================================
+.aider*
