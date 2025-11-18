@@ -1,9 +1,11 @@
 from typing import Tuple
 import pygame
-from model.state import AppState
+from ..model.state import AppState
+
 
 class LabelDinamico:
     """Label dinâmico que exibe o valor atual do slider."""
+
     def __init__(self, center: Tuple[int, int]) -> None:
         self.center = center
         self.font = pygame.font.SysFont("Arial", 32, bold=True)

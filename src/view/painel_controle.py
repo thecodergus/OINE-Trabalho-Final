@@ -1,20 +1,20 @@
 from typing import Tuple
 import pygame
-from model.state import AppState
-from view.slider import ControleSlider
-from view.label import LabelDinamico
+from ..model.state import AppState
+from .slider import ControleSlider
+from .label import LabelDinamico
+
 
 class PainelControle:
     """Painel de controle: organiza slider e label conforme wireframe."""
+
     def __init__(self, panel_rect: Tuple[int, int, int, int]) -> None:
         self.panel_rect = pygame.Rect(panel_rect)
         # Layout: slider centralizado, label acima
         slider_x = self.panel_rect.x + 50
         slider_y = self.panel_rect.y + 120
         self.slider = ControleSlider(
-            rect=(slider_x, slider_y, 200, 8),
-            min_value=-50.0,
-            max_value=150.0
+            rect=(slider_x, slider_y, 200, 8), min_value=-50.0, max_value=150.0
         )
         label_x = self.panel_rect.x + (self.panel_rect.width // 2)
         label_y = slider_y - 52  # 32 px label + 20 px espaçamento

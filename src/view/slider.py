@@ -1,10 +1,14 @@
 from typing import Tuple
 import pygame
-from model.state import AppState
+from ..model.state import AppState
+
 
 class ControleSlider:
     """Slider horizontal de temperatura, interativo e funcional."""
-    def __init__(self, rect: Tuple[int, int, int, int], min_value: float, max_value: float) -> None:
+
+    def __init__(
+        self, rect: Tuple[int, int, int, int], min_value: float, max_value: float
+    ) -> None:
         self.rect = pygame.Rect(rect)
         self.min_value = min_value
         self.max_value = max_value
@@ -34,6 +38,7 @@ class ControleSlider:
                 new_value = self.pos_to_value(event.pos[0])
                 # Retorna novo estado imutável
                 from dataclasses import replace
+
                 return replace(state, slider_value=new_value)
         return state
 
@@ -52,5 +57,9 @@ class ControleSlider:
         # Thumb
         thumb_x = self.value_to_pos(state.slider_value)
         thumb_y = self.rect.y + self.rect.height // 2
-        pygame.draw.circle(surface, (80, 120, 200), (thumb_x, thumb_y), self.thumb_radius)
-        pygame.draw.circle(surface, (40, 40, 40), (thumb_x, thumb_y), self.thumb_radius, width=2)
+        pygame.draw.circle(
+            surface, (80, 120, 200), (thumb_x, thumb_y), self.thumb_radius
+        )
+        pygame.draw.circle(
+            surface, (40, 40, 40), (thumb_x, thumb_y), self.thumb_radius, width=2
+        )

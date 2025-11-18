@@ -1,7 +1,19 @@
 from typing import Final
 import pygame
-from model.state import AppState
-from view.painel_controle import PainelControle
+from src.model.state import AppState
+from src.view.painel_controle import PainelControle
+import sys
+import os
+
+
+def resource_path(rel_path: str) -> str:
+    """
+    Retorna o caminho absoluto para um recurso empacotado, compatível com PyInstaller.
+    """
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, rel_path)
+    return os.path.join(os.path.abspath("."), rel_path)
+
 
 def main() -> None:
     """Ponto de entrada do simulador educacional de escalas de temperatura."""
@@ -32,6 +44,7 @@ def main() -> None:
         clock.tick(60)
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()

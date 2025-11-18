@@ -333,3 +333,7 @@ config.local.*
 #   adicione-os nas seções apropriadas mantendo a organização.
 # ================================================================================
 .aider*
+
+*.xml
+*.exe
+dist/
