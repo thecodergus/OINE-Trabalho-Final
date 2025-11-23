@@ -178,7 +178,6 @@ processed_assets/
 # ================================================================================
 
 # Visual Studio Code
-.vscode/
 .history/
 
 # PyCharm
