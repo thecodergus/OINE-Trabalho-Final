@@ -1,65 +1,16 @@
-# =============================================================================
-# Codemagus — Simulação de Temperatura (Wireframe Fiel)
-# Python 3.13+, PyGame 2.6+, arquitetura funcional, tipagem moderna
-# =============================================================================
-
 import pygame
 from dataclasses import dataclass, replace
-from typing import Tuple, Literal, List
+from typing import Tuple, Optional, Literal, Dict
 
-# =============================================================================
-# 1. Constantes de Layout e Aparência
-# =============================================================================
+# =========================
+# 1. Utilitários e Constantes
+# =========================
 
-TELA_LARGURA: int = 1024
-TELA_ALTURA: int = 768
-
-# Termômetros
-TERMOMETRO_DIM: Tuple[int, int] = (32, 293)
-TERMOMETRO_Y: int = 111
-TERMOMETRO_XS: List[int] = [159, 502, 703]
-TERMOMETRO_ESCALAS: List[Literal["K", "°C", "°F"]] = ["K", "°C", "°F"]
-
-# Painel lateral direito
-PAINEL_X: int = 860
-PAINEL_Y: int = 77
-PAINEL_W: int = 120
-PAINEL_H: int = 180
-
-# Botões + e -
-BOTAO_RAIO: int = 18
-BOTAO_Y: int = PAINEL_Y + 60
-BOTAO_MAIS_X: int = PAINEL_X + 80
-BOTAO_MENOS_X: int = PAINEL_X + 22
-
-# Texto faixa temperatura
-FAIXA_LABEL_Y: int = PAINEL_Y + 20
-
-# Imagens dos materiais (parte inferior)
-MATERIAL_IMG_DIM: Tuple[int, int] = (120, 88)
-MATERIAL_IMG_Y: int = 549
-MATERIAL_LABEL_Y: int = MATERIAL_IMG_Y - 32
-MATERIAL_XS: List[int] = [159, 444, 717]
-MATERIAIS: List[Tuple[str, str]] = [
-    ("Água", "agua.png"),
-    ("Vidro", "vidro.png"),
-    ("Alumínio", "aluminio.png"),
-]
-
-# Cores
-def hex_to_rgb(hex_color: str) -> Tuple[int, int, int]:
-    """
-    Converte uma string hexadecimal (#RRGGBB ou RRGGBB) em uma tupla RGB (r, g, b).
-    Garante tipagem Tuple[int, int, int] para compatibilidade com type checkers modernos.
-    """
-    h = hex_color.lstrip('#')
+def hex_to_rgb(h: str) -> Tuple[int, int, int]:
+    h = h.lstrip("#")
     if len(h) != 6:
-        raise ValueError(f"Formato hexadecimal inválido: '{hex_color}'. Esperado: #RRGGBB ou RRGGBB")
-    # Desempacotamento explícito para garantir Tuple[int, int, int]
-    r = int(h[0:2], 16)
-    g = int(h[2:4], 16)
-    b = int(h[4:6], 16)
-    return (r, g, b)
+        raise ValueError(f"Formato hexadecimal inválido: '{h}'")
+    return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
 
 CORES = {
     "fundo": hex_to_rgb("#FFFFFF"),
@@ -80,97 +31,226 @@ FONTES = {
     "valor": ("Arial", 14, True),
 }
 
-TEMP_MIN: float = -50.0
-TEMP_MAX: float = 300.0
+TELA_LARGURA, TELA_ALTURA = 1024, 768
 
-# =============================================================================
-# 2. Estado Global Imutável
-# =============================================================================
+# Termômetros
+TERMOMETRO_DIM = (32, 293)
+TERMOMETRO_Y = 111
+TERMOMETRO_XS = [159, 502, 703]
+TERMOMETRO_ESCALAS = ["K", "°C", "°F"]
+THUMB_RAIO = 18
+
+# Painel lateral direito
+PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H = 860, 77, 120, 180
+BOTAO_RAIO = 18
+BOTAO_Y = PAINEL_Y + 60
+BOTAO_MAIS_X = PAINEL_X + 80
+BOTAO_MENOS_X = PAINEL_X + 22
+FAIXA_LABEL_Y = PAINEL_Y + 20
+
+# Materiais (parte inferior)
+MATERIAL_IMG_DIM = (120, 88)
+MATERIAL_IMG_Y = 549
+MATERIAL_LABEL_Y = MATERIAL_IMG_Y - 32
+MATERIAL_XS = [159, 444, 717]
+MATERIAIS = [
+    ("Água", "src/assets/imagem_generica.jpg"),
+    ("Vidro", "src/assets/imagem_generica.jpg"),
+    ("Alumínio", "src/assets/imagem_generica.jpg"),
+]
+
+# =========================
+# 2. Conversão de Temperaturas
+# =========================
+
+def celsius_to_kelvin(c: float) -> float:
+    return c + 273.15
+
+def celsius_to_fahrenheit(c: float) -> float:
+    return c * 9.0 / 5.0 + 32.0
+
+def kelvin_to_celsius(k: float) -> float:
+    return k - 273.15
+
+def fahrenheit_to_celsius(f: float) -> float:
+    return (f - 32.0) * 5.0 / 9.0
+
+def converter(valor: float, de: str, para: str) -> float:
+    if de == para:
+        return valor
+    if de == "°C":
+        if para == "K":
+            return celsius_to_kelvin(valor)
+        if para == "°F":
+            return celsius_to_fahrenheit(valor)
+    if de == "K":
+        c = kelvin_to_celsius(valor)
+        return c if para == "°C" else celsius_to_fahrenheit(c)
+    if de == "°F":
+        c = fahrenheit_to_celsius(valor)
+        return c if para == "°C" else celsius_to_kelvin(c)
+    raise ValueError(f"Conversão inválida: {de} -> {para}")
+
+# =========================
+# 3. Estado Global Imutável
+# =========================
 
 @dataclass(frozen=True, slots=True)
 class AppState:
-    temperatura_c: float = -5.0
+    temp_min: float = -50.0
+    temp_max: float = 300.0
+    escala_ativa: str = "°C"  # "K", "°C", "°F"
+    valor_ativo: float = 20.0
+    arrastando: Optional[str] = None  # "K", "°C", "°F" ou None
 
-    @property
-    def temperatura_k(self) -> float:
-        return self.temperatura_c + 273.15
+    def valores(self) -> Dict[str, float]:
+        """Retorna os valores atuais em cada escala, reativos."""
+        match self.escala_ativa:
+            case "°C":
+                c = self.valor_ativo
+                return {
+                    "°C": c,
+                    "K": celsius_to_kelvin(c),
+                    "°F": celsius_to_fahrenheit(c),
+                }
+            case "K":
+                k = self.valor_ativo
+                c = kelvin_to_celsius(k)
+                return {
+                    "K": k,
+                    "°C": c,
+                    "°F": celsius_to_fahrenheit(c),
+                }
+            case "°F":
+                f = self.valor_ativo
+                c = fahrenheit_to_celsius(f)
+                return {
+                    "°F": f,
+                    "°C": c,
+                    "K": celsius_to_kelvin(c),
+                }
+            case _:
+                raise ValueError("Escala ativa inválida")
 
-    @property
-    def temperatura_f(self) -> float:
-        return self.temperatura_c * 9.0 / 5.0 + 32.0
+    def clamp_valor(self, valor: float) -> float:
+        return max(self.temp_min, min(self.temp_max, valor))
 
-# =============================================================================
-# 3. Termômetro Vertical Fiel ao Wireframe
-# =============================================================================
+# =========================
+# 4. Termômetro Interativo
+# =========================
 
 class Termometro:
     """
-    Termômetro vertical alinhado ao wireframe, com label acima.
+    Termômetro vertical com thumb arrastável, sincronização reativa.
     """
-    def __init__(self, x: int, escala: Literal["K", "°C", "°F"]) -> None:
+    def __init__(self, x: int, escala: str) -> None:
         self.x = x
         self.y = TERMOMETRO_Y
         self.w, self.h = TERMOMETRO_DIM
         self.escala = escala
         self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
 
-    def valor(self, state: AppState) -> float:
-        match self.escala:
-            case "K": return state.temperatura_k
-            case "°C": return state.temperatura_c
-            case "°F": return state.temperatura_f
-            case _: return 0.0
+    def valor_para_y(self, valor: float, temp_min: float, temp_max: float) -> int:
+        """Converte valor de temperatura para coordenada Y do thumb."""
+        ratio = (valor - temp_min) / (temp_max - temp_min)
+        return int(self.y + self.h - ratio * self.h)
+
+    def y_para_valor(self, y: int, temp_min: float, temp_max: float) -> float:
+        """Converte coordenada Y do mouse para valor de temperatura."""
+        y = max(self.y, min(self.y + self.h, y))
+        ratio = (self.y + self.h - y) / self.h
+        return temp_min + ratio * (temp_max - temp_min)
+
+    def thumb_pos(self, state: AppState) -> Tuple[int, int]:
+        valor = state.valores()[self.escala]
+        y = self.valor_para_y(valor, state.temp_min, state.temp_max)
+        x = self.x + self.w // 2
+        return (x, y)
+
+    def handle_event(self, event: pygame.event.Event, state: AppState) -> Optional[AppState]:
+        thumb_x, thumb_y = self.thumb_pos(state)
+        mouse_x, mouse_y = getattr(event, "pos", (None, None))
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if (mouse_x is not None and
+                (thumb_x - THUMB_RAIO) <= mouse_x <= (thumb_x + THUMB_RAIO) and
+                (thumb_y - THUMB_RAIO) <= mouse_y <= (thumb_y + THUMB_RAIO)):
+                # Inicia arraste deste termômetro
+                return replace(state, arrastando=self.escala)
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if state.arrastando == self.escala:
+                # Finaliza arraste
+                return replace(state, arrastando=None)
+        elif event.type == pygame.MOUSEMOTION:
+            if state.arrastando == self.escala:
+                # Atualiza valor conforme posição do mouse
+                novo_valor = self.y_para_valor(mouse_y, state.temp_min, state.temp_max)
+                novo_valor = state.clamp_valor(novo_valor)
+                return AppState(
+                    temp_min=state.temp_min,
+                    temp_max=state.temp_max,
+                    escala_ativa=self.escala,
+                    valor_ativo=novo_valor,
+                    arrastando=self.escala
+                )
+        return None
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
         # Corpo do termômetro
         pygame.draw.rect(surf, (240, 240, 240), self.rect, border_radius=8)
         pygame.draw.rect(surf, CORES["termometro_borda"], self.rect, 2, border_radius=8)
         # Nível preenchido
-        v = self.valor(state)
-        vmin, vmax = {
-            "K": (223.15, 573.15),
-            "°C": (TEMP_MIN, TEMP_MAX),
-            "°F": (TEMP_MIN * 9/5 + 32, TEMP_MAX * 9/5 + 32),
-        }[self.escala]
-        nivel = max(0.0, min(1.0, (v - vmin) / (vmax - vmin)))
+        valor = state.valores()[self.escala]
+        nivel = (valor - state.temp_min) / (state.temp_max - state.temp_min)
         nivel_px = int(self.h * nivel)
         rect_preenchido = pygame.Rect(self.x, self.y + self.h - nivel_px, self.w, nivel_px)
         pygame.draw.rect(surf, CORES["indicador"], rect_preenchido, border_radius=8)
+        # Thumb (bolinha)
+        thumb_x, thumb_y = self.thumb_pos(state)
+        cor_thumb = CORES["indicador"] if state.arrastando == self.escala else CORES["painel_borda"]
+        pygame.draw.circle(surf, cor_thumb, (thumb_x, thumb_y), THUMB_RAIO)
+        pygame.draw.circle(surf, CORES["texto"], (thumb_x, thumb_y), THUMB_RAIO, 2)
         # Label acima
         fonte = pygame.font.SysFont(*FONTES["valor"])
-        txt = fonte.render(f"{self.valor(state):.2f} {self.escala}", True, CORES["texto"])
+        txt = fonte.render(f"{valor:.2f} {self.escala}", True, CORES["texto"])
         surf.blit(txt, (self.x + (self.w - txt.get_width()) // 2, self.y - 32))
 
-# =============================================================================
-# 4. Painel Lateral Direito: Faixa, Botões + e -
-# =============================================================================
+# =========================
+# 5. Painel de Controle (Intervalo)
+# =========================
 
 class PainelControle:
     """
-    Painel de controle principal da simulação de temperatura.
-    Gerencia faixa de temperatura e botões + e −, fiel ao wireframe.
+    Painel de controle: botões + e -, exibe intervalo dinâmico.
     """
-    def __init__(self, rect: tuple[int, int, int, int]) -> None:
+    def __init__(self, rect: Tuple[int, int, int, int]) -> None:
         self.panel_rect = pygame.Rect(rect)
-        # Botões lado a lado, centralizados verticalmente
         self.botao_mais = pygame.Rect(BOTAO_MAIS_X - BOTAO_RAIO, BOTAO_Y - BOTAO_RAIO, BOTAO_RAIO*2, BOTAO_RAIO*2)
         self.botao_menos = pygame.Rect(BOTAO_MENOS_X - BOTAO_RAIO, BOTAO_Y - BOTAO_RAIO, BOTAO_RAIO*2, BOTAO_RAIO*2)
+        self.min_intervalo = 10.0  # diferença mínima entre min e max
 
     def handle_event(self, event: pygame.event.Event, state: AppState) -> AppState:
+        if state.arrastando is not None:
+            return state  # Não altera intervalo durante arraste
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.botao_mais.collidepoint(event.pos):
-                return replace(state, temperatura_c=min(state.temperatura_c + 1, TEMP_MAX))
+                novo_max = state.temp_max + 10
+                if novo_max - state.temp_min >= self.min_intervalo:
+                    # Ajusta valor ativo se necessário
+                    novo_valor = min(state.valor_ativo, novo_max)
+                    return replace(state, temp_max=novo_max, valor_ativo=novo_valor)
             if self.botao_menos.collidepoint(event.pos):
-                return replace(state, temperatura_c=max(state.temperatura_c - 1, TEMP_MIN))
+                novo_min = state.temp_min - 10
+                if state.temp_max - novo_min >= self.min_intervalo:
+                    novo_valor = max(state.valor_ativo, novo_min)
+                    return replace(state, temp_min=novo_min, valor_ativo=novo_valor)
         return state
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
-        # Painel de fundo
         pygame.draw.rect(surf, CORES["painel"], (PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H), border_radius=16)
         pygame.draw.rect(surf, CORES["painel_borda"], (PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H), 2, border_radius=16)
         # Texto faixa temperatura (acima dos botões)
         fonte = pygame.font.SysFont(*FONTES["rotulo"])
-        txt = fonte.render("(-50, 300) °C", True, CORES["texto"])
+        txt = fonte.render(f"({int(state.temp_min)}, {int(state.temp_max)}) ºC", True, CORES["texto"])
         surf.blit(txt, (PAINEL_X + (PAINEL_W - txt.get_width()) // 2, FAIXA_LABEL_Y))
         # Botão +
         pygame.draw.circle(surf, CORES["botao_mais"], self.botao_mais.center, BOTAO_RAIO)
@@ -184,13 +264,13 @@ class PainelControle:
         txt_menos = fonte_b.render("−", True, CORES["texto"])
         surf.blit(txt_menos, (self.botao_menos.centerx - txt_menos.get_width()//2, self.botao_menos.centery - txt_menos.get_height()//2))
 
-# =============================================================================
-# 5. Imagens dos Materiais (Parte Inferior)
-# =============================================================================
+# =========================
+# 6. Imagens dos Materiais
+# =========================
 
 class MaterialDisplay:
     """
-    Exibe imagem do material e nome acima, fiel ao wireframe.
+    Exibe imagem do material e nome acima.
     """
     def __init__(self, x: int, nome: str, img_path: str) -> None:
         self.x = x
@@ -198,7 +278,6 @@ class MaterialDisplay:
         self.w, self.h = MATERIAL_IMG_DIM
         self.nome = nome
         self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
-        # Tenta carregar a imagem, se não conseguir, usa um placeholder
         try:
             self.image = pygame.image.load(img_path).convert_alpha()
             self.image = pygame.transform.scale(self.image, (self.w, self.h))
@@ -210,27 +289,25 @@ class MaterialDisplay:
             pygame.draw.line(self.image, CORES["material_borda"], (self.w, 0), (0, self.h), 2)
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
-        # Nome do material acima da imagem
         fonte = pygame.font.SysFont(*FONTES["rotulo"])
         txt = fonte.render(self.nome, True, CORES["texto"])
         surf.blit(txt, (self.x + (self.w - txt.get_width()) // 2, MATERIAL_LABEL_Y))
-        # Desenha a imagem (ou placeholder)
         surf.blit(self.image, self.rect)
         pygame.draw.rect(surf, CORES["material_borda"], self.rect, 2, border_radius=8)
 
-# =============================================================================
-# 6. Gerenciador Principal da Interface
-# =============================================================================
+# =========================
+# 7. Interface Principal
+# =========================
 
 class InterfaceManager:
     """
-    Gerencia todos os componentes da interface, garantindo layout fiel ao wireframe.
+    Gerencia todos os componentes da interface.
     """
     def __init__(self) -> None:
         self.termometros = [
-            Termometro(TERMOMETRO_XS[0], TERMOMETRO_ESCALAS[0]),
-            Termometro(TERMOMETRO_XS[1], TERMOMETRO_ESCALAS[1]),
-            Termometro(TERMOMETRO_XS[2], TERMOMETRO_ESCALAS[2]),
+            Termometro(TERMOMETRO_XS[0], "K"),
+            Termometro(TERMOMETRO_XS[1], "°C"),
+            Termometro(TERMOMETRO_XS[2], "°F"),
         ]
         self.painel_controle = PainelControle(rect=(PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H))
         self.materiais_display = [
@@ -239,6 +316,11 @@ class InterfaceManager:
         ]
 
     def handle_event(self, event: pygame.event.Event, state: AppState) -> AppState:
+        # Prioridade: arraste de termômetro > painel de controle
+        for termo in self.termometros:
+            novo = termo.handle_event(event, state)
+            if novo is not None and novo != state:
+                return novo
         return self.painel_controle.handle_event(event, state)
 
     def render(self, surface: pygame.Surface, state: AppState) -> None:
@@ -248,9 +330,9 @@ class InterfaceManager:
         for material in self.materiais_display:
             material.render(surface, state)
 
-# =============================================================================
-# 7. Função Principal (main loop)
-# =============================================================================
+# =========================
+# 8. Função Principal
+# =========================
 
 def main() -> None:
     pygame.init()
@@ -273,13 +355,9 @@ def main() -> None:
         clock.tick(60)
     pygame.quit()
 
-# =============================================================================
-# 8. Execução Direta
-# =============================================================================
+# =========================
+# 9. Execução Direta
+# =========================
 
 if __name__ == "__main__":
     main()
-
-# =============================================================================
-# Fim do código Codemagus — Simulação de Temperatura (Wireframe Fiel)
-# =============================================================================
