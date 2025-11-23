@@ -25,10 +25,11 @@ CORES = {
     "material_fundo": (200, 200, 200),
 }
 
+# Fontes dobradas
 FONTES = {
-    "titulo": ("Arial", 16, True),
-    "rotulo": ("Arial", 12, False),
-    "valor": ("Arial", 14, True),
+    "titulo": ("Arial", 32, True),   # Dobro do padrão anterior
+    "rotulo": ("Arial", 24, False),
+    "valor": ("Arial", 28, True),
 }
 
 TELA_LARGURA, TELA_ALTURA = 1024, 768
@@ -36,9 +37,19 @@ TELA_LARGURA, TELA_ALTURA = 1024, 768
 # Termômetros
 TERMOMETRO_DIM = (32, 293)
 TERMOMETRO_Y = 111
-TERMOMETRO_XS = [159, 502, 703]
+TERMOMETRO_COUNT = 3
 TERMOMETRO_ESCALAS = ["K", "°C", "°F"]
 THUMB_RAIO = 18
+BASE_RAIO = 22
+
+# Espaçamento dinâmico centralizado
+def calcular_termometro_xs() -> Tuple[int, int, int]:
+    margem_lateral = 159
+    area_util = TELA_LARGURA - 2 * margem_lateral
+    espacamento = (area_util - TERMOMETRO_COUNT * TERMOMETRO_DIM[0]) // (TERMOMETRO_COUNT - 1)
+    xs = [margem_lateral + i * (TERMOMETRO_DIM[0] + espacamento) for i in range(TERMOMETRO_COUNT)]
+    return tuple(xs)
+TERMOMETRO_XS = calcular_termometro_xs()
 
 # Painel lateral direito
 PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H = 860, 77, 120, 180
@@ -51,7 +62,7 @@ FAIXA_LABEL_Y = PAINEL_Y + 20
 # Materiais (parte inferior)
 MATERIAL_IMG_DIM = (120, 88)
 MATERIAL_IMG_Y = 549
-MATERIAL_LABEL_Y = MATERIAL_IMG_Y - 32
+MATERIAL_LABEL_Y = MATERIAL_IMG_Y - 48  # Ajustado para fonte maior
 MATERIAL_XS = [159, 444, 717]
 MATERIAIS = [
     ("Água", "src/assets/imagem_generica.jpg"),
@@ -104,7 +115,6 @@ class AppState:
     arrastando: Optional[str] = None  # "K", "°C", "°F" ou None
 
     def valores(self) -> Dict[str, float]:
-        """Retorna os valores atuais em cada escala, reativos."""
         match self.escala_ativa:
             case "°C":
                 c = self.valor_ativo
@@ -141,7 +151,7 @@ class AppState:
 
 class Termometro:
     """
-    Termômetro vertical com thumb arrastável, sincronização reativa.
+    Termômetro vertical com thumb arrastável e círculo na base, ambos vermelhos.
     """
     def __init__(self, x: int, escala: str) -> None:
         self.x = x
@@ -151,12 +161,10 @@ class Termometro:
         self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
 
     def valor_para_y(self, valor: float, temp_min: float, temp_max: float) -> int:
-        """Converte valor de temperatura para coordenada Y do thumb."""
         ratio = (valor - temp_min) / (temp_max - temp_min)
         return int(self.y + self.h - ratio * self.h)
 
     def y_para_valor(self, y: int, temp_min: float, temp_max: float) -> float:
-        """Converte coordenada Y do mouse para valor de temperatura."""
         y = max(self.y, min(self.y + self.h, y))
         ratio = (self.y + self.h - y) / self.h
         return temp_min + ratio * (temp_max - temp_min)
@@ -167,6 +175,9 @@ class Termometro:
         x = self.x + self.w // 2
         return (x, y)
 
+    def base_pos(self) -> Tuple[int, int]:
+        return (self.x + self.w // 2, self.y + self.h)
+
     def handle_event(self, event: pygame.event.Event, state: AppState) -> Optional[AppState]:
         thumb_x, thumb_y = self.thumb_pos(state)
         mouse_x, mouse_y = getattr(event, "pos", (None, None))
@@ -174,15 +185,12 @@ class Termometro:
             if (mouse_x is not None and
                 (thumb_x - THUMB_RAIO) <= mouse_x <= (thumb_x + THUMB_RAIO) and
                 (thumb_y - THUMB_RAIO) <= mouse_y <= (thumb_y + THUMB_RAIO)):
-                # Inicia arraste deste termômetro
                 return replace(state, arrastando=self.escala)
         elif event.type == pygame.MOUSEBUTTONUP:
             if state.arrastando == self.escala:
-                # Finaliza arraste
                 return replace(state, arrastando=None)
         elif event.type == pygame.MOUSEMOTION:
             if state.arrastando == self.escala:
-                # Atualiza valor conforme posição do mouse
                 novo_valor = self.y_para_valor(mouse_y, state.temp_min, state.temp_max)
                 novo_valor = state.clamp_valor(novo_valor)
                 return AppState(
@@ -204,15 +212,18 @@ class Termometro:
         nivel_px = int(self.h * nivel)
         rect_preenchido = pygame.Rect(self.x, self.y + self.h - nivel_px, self.w, nivel_px)
         pygame.draw.rect(surf, CORES["indicador"], rect_preenchido, border_radius=8)
-        # Thumb (bolinha)
+        # Círculo da base (vermelho)
+        base_x, base_y = self.base_pos()
+        pygame.draw.circle(surf, CORES["indicador"], (base_x, base_y), BASE_RAIO)
+        pygame.draw.circle(surf, CORES["texto"], (base_x, base_y), BASE_RAIO, 2)
+        # Thumb (bolinha vermelha)
         thumb_x, thumb_y = self.thumb_pos(state)
-        cor_thumb = CORES["indicador"] if state.arrastando == self.escala else CORES["painel_borda"]
-        pygame.draw.circle(surf, cor_thumb, (thumb_x, thumb_y), THUMB_RAIO)
+        pygame.draw.circle(surf, CORES["indicador"], (thumb_x, thumb_y), THUMB_RAIO)
         pygame.draw.circle(surf, CORES["texto"], (thumb_x, thumb_y), THUMB_RAIO, 2)
         # Label acima
         fonte = pygame.font.SysFont(*FONTES["valor"])
         txt = fonte.render(f"{valor:.2f} {self.escala}", True, CORES["texto"])
-        surf.blit(txt, (self.x + (self.w - txt.get_width()) // 2, self.y - 32))
+        surf.blit(txt, (self.x + (self.w - txt.get_width()) // 2, self.y - 48))
 
 # =========================
 # 5. Painel de Controle (Intervalo)
@@ -226,16 +237,15 @@ class PainelControle:
         self.panel_rect = pygame.Rect(rect)
         self.botao_mais = pygame.Rect(BOTAO_MAIS_X - BOTAO_RAIO, BOTAO_Y - BOTAO_RAIO, BOTAO_RAIO*2, BOTAO_RAIO*2)
         self.botao_menos = pygame.Rect(BOTAO_MENOS_X - BOTAO_RAIO, BOTAO_Y - BOTAO_RAIO, BOTAO_RAIO*2, BOTAO_RAIO*2)
-        self.min_intervalo = 10.0  # diferença mínima entre min e max
+        self.min_intervalo = 10.0
 
     def handle_event(self, event: pygame.event.Event, state: AppState) -> AppState:
         if state.arrastando is not None:
-            return state  # Não altera intervalo durante arraste
+            return state
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.botao_mais.collidepoint(event.pos):
                 novo_max = state.temp_max + 10
                 if novo_max - state.temp_min >= self.min_intervalo:
-                    # Ajusta valor ativo se necessário
                     novo_valor = min(state.valor_ativo, novo_max)
                     return replace(state, temp_max=novo_max, valor_ativo=novo_valor)
             if self.botao_menos.collidepoint(event.pos):
@@ -248,7 +258,6 @@ class PainelControle:
     def render(self, surf: pygame.Surface, state: AppState) -> None:
         pygame.draw.rect(surf, CORES["painel"], (PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H), border_radius=16)
         pygame.draw.rect(surf, CORES["painel_borda"], (PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H), 2, border_radius=16)
-        # Texto faixa temperatura (acima dos botões)
         fonte = pygame.font.SysFont(*FONTES["rotulo"])
         txt = fonte.render(f"({int(state.temp_min)}, {int(state.temp_max)}) ºC", True, CORES["texto"])
         surf.blit(txt, (PAINEL_X + (PAINEL_W - txt.get_width()) // 2, FAIXA_LABEL_Y))
