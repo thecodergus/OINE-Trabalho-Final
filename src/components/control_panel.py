@@ -37,8 +37,10 @@ class PainelControle:
                 novo_min = max(novo_min, -50.0)
                 novo_max = max(novo_max, 300.0)
                 
-                # Atualizar também o valor ativo
-                novo_valor = min(max(state.valor_ativo + 10, novo_min), novo_max)
+                # Atualizar também o valor ativo (aumenta 10 unidades)
+                novo_valor = state.valor_ativo + 10
+                # Garantir que o valor esteja dentro dos novos limites
+                novo_valor = max(novo_min, min(novo_max, novo_valor))
                 
                 novo_state = AppState(
                     temp_min=novo_min,
@@ -50,16 +52,20 @@ class PainelControle:
                     botao_menos_pressionado=state.botao_menos_pressionado
                 )
             if self.botao_menos.collidepoint(event.pos):
-                # Diminuir: temp_min = valor_atual + 150, temp_max = valor_atual - 150
-                novo_min = state.valor_ativo + 150
-                novo_max = state.valor_ativo - 150
+                # Correção: quando o botão - é pressionado, deve SUBTRAIR
+                # temp_min = valor_atual - 150, temp_max = valor_atual + 150 (mesma lógica do +)
+                # Mas o valor ativo deve diminuir
+                novo_min = state.valor_ativo - 150
+                novo_max = state.valor_ativo + 150
                 
                 # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 300
                 novo_min = max(novo_min, -50.0)
                 novo_max = max(novo_max, 300.0)
                 
-                # Atualizar também o valor ativo
-                novo_valor = min(max(state.valor_ativo - 10, novo_min), novo_max)
+                # Atualizar também o valor ativo (diminui 10 unidades)
+                novo_valor = state.valor_ativo - 10
+                # Garantir que o valor esteja dentro dos novos limites
+                novo_valor = max(novo_min, min(novo_max, novo_valor))
                 
                 novo_state = AppState(
                     temp_min=novo_min,
