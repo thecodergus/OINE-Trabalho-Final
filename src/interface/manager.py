@@ -26,10 +26,11 @@ class InterfaceManager:
         self.painel_controle = PainelControle(
             rect=(PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H)
         )
-        self.materiais_display = [
-            MaterialDisplay(MATERIAL_XS[i], MATERIAIS[i][0], MATERIAIS[i][1])
-            for i in range(len(MATERIAIS))
-        ]
+        self.materiais_display = []
+        for i in range(len(MATERIAIS)):
+            nome, img_path = MATERIAIS[i]
+            print(f"Criando MaterialDisplay {i}: nome={nome}, img_path={img_path}")
+            self.materiais_display.append(MaterialDisplay(MATERIAL_XS[i], nome, img_path))
 
     def handle_event(self, event: pygame.event.Event, state: AppState) -> AppState:
         novo_state = state

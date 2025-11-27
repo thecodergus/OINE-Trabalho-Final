@@ -73,22 +73,19 @@ class PainelControle:
         return state
 
     def _handle_plus_button(self, state: AppState) -> AppState:
-        # Expandir o intervalo de temperatura multiplicando por 2
-        range_center = (state.temp_min + state.temp_max) / 2
-        range_size = state.temp_max - state.temp_min
-
-        # Dobrar o tamanho do intervalo
-        new_range_size = range_size * 2
-        new_min = range_center - new_range_size / 2
-        new_max = range_center + new_range_size / 2
+        # Multiplicar ambos os valores por 2
+        new_min = state.temp_min * 2
+        new_max = state.temp_max * 2
 
         # Aplicar limites
-        new_min = max(new_min, TEMP_MIN_LIMITE)
-        new_max = min(new_max, TEMP_MAX_LIMITE)
+        # O valor negativo não pode ser maior que -50 (ex: -40, -30 não são permitidos)
+        # Mas pode ser menor (ex: -100, -200, etc.)
+        # O valor positivo pode ser qualquer valor positivo (sem limite inferior nem superior)
+        # new_max não precisa de limite mínimo pois pode ser qualquer valor positivo
 
         # Ajustar o valor ativo proporcionalmente
-        if range_size > 0:
-            position_ratio = (state.valor_ativo - state.temp_min) / range_size
+        if state.temp_max - state.temp_min > 0:
+            position_ratio = (state.valor_ativo - state.temp_min) / (state.temp_max - state.temp_min)
             novo_valor = new_min + position_ratio * (new_max - new_min)
         else:
             novo_valor = state.valor_ativo
@@ -104,22 +101,26 @@ class PainelControle:
         )
 
     def _handle_minus_button(self, state: AppState) -> AppState:
-        # Contrair o intervalo de temperatura dividindo por 2
-        range_center = (state.temp_min + state.temp_max) / 2
-        range_size = state.temp_max - state.temp_min
+        # Dividir ambos os valores por 2
+        new_min = state.temp_min / 2
+        new_max = state.temp_max / 2
 
-        # Dividir o tamanho do intervalo por 2
-        new_range_size = range_size / 2
-        new_min = range_center - new_range_size / 2
-        new_max = range_center + new_range_size / 2
+        # Aplicar limites para continuar até chegar a (-50, 50)
+        # O valor negativo deve se aproximar de -50 (mas não ultrapassar para valores mais positivos)
+        # Se o valor negativo for maior que -50 (ex: -25), deve ficar em -50
+        # Se o valor negativo for menor que -50 (ex: -100), dividir por 2 o aproxima de -50
+        if new_min > TEMP_MIN_LIMITE:  # Se for maior que -50 (ex: -25)
+            new_min = TEMP_MIN_LIMITE   # Fica em -50
 
-        # Aplicar limites
-        new_min = max(new_min, TEMP_MIN_LIMITE)
-        new_max = min(new_max, TEMP_MAX_LIMITE)
+        # O valor positivo deve se aproximar de 50 (mas não ultrapassar para valores menores)
+        # Se o valor positivo for menor que 50 (ex: 25), deve ficar em 50
+        # Se o valor positivo for maior que 50 (ex: 100), dividir por 2 o aproxima de 50
+        if new_max < 50.0:  # Se for menor que 50 (ex: 25)
+            new_max = 50.0   # Fica em 50
 
         # Ajustar o valor ativo proporcionalmente
-        if range_size > 0:
-            position_ratio = (state.valor_ativo - state.temp_min) / range_size
+        if state.temp_max - state.temp_min > 0:
+            position_ratio = (state.valor_ativo - state.temp_min) / (state.temp_max - state.temp_min)
             novo_valor = new_min + position_ratio * (new_max - new_min)
         else:
             novo_valor = state.valor_ativo

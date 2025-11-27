@@ -26,10 +26,26 @@ class MaterialDisplay:
     def _load_image(self, img_path: str) -> pygame.Surface:
         """Carrega e prepara a imagem do material."""
         try:
-            if not os.path.exists(img_path):
-                raise FileNotFoundError(f"Arquivo não encontrado: {img_path}")
-            image = pygame.image.load(img_path).convert_alpha()
-            return pygame.transform.scale(image, (self.w, self.h))
+            print(f"Tentando carregar imagem: {img_path}")
+            # Try the path as-is first
+            if os.path.exists(img_path):
+                image = pygame.image.load(img_path).convert_alpha()
+                print(f"Imagem carregada com sucesso: {img_path}")
+                return pygame.transform.scale(image, (self.w, self.h))
+
+            # If that fails, try relative to project root
+            # Get the project root (assuming this file is in src/components)
+            project_root = os.path.join(os.path.dirname(__file__), '..', '..')
+            full_path = os.path.join(project_root, img_path)
+            full_path = os.path.normpath(full_path)
+            print(f"Tentando caminho completo: {full_path}")
+
+            if os.path.exists(full_path):
+                image = pygame.image.load(full_path).convert_alpha()
+                print(f"Imagem carregada com sucesso: {full_path}")
+                return pygame.transform.scale(image, (self.w, self.h))
+
+            raise FileNotFoundError(f"Arquivo não encontrado: {img_path} ou {full_path}")
         except (pygame.error, FileNotFoundError) as e:
             print(f"Erro ao carregar imagem {img_path}: {e}")
             return self._create_placeholder_image()
