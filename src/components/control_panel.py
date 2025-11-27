@@ -46,9 +46,9 @@ class PainelControle:
                 novo_min = base_min + nova_distancia_min
                 novo_max = base_max + nova_distancia_max
                 
-                # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 300
+                # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 50
                 novo_min = max(novo_min, -50.0)
-                novo_max = max(novo_max, 300.0)
+                novo_max = max(novo_max, 50.0)
                 
                 # Atualizar também o valor ativo (aumenta proporcionalmente)
                 # Usando o centro do intervalo como referência
@@ -87,9 +87,9 @@ class PainelControle:
                 novo_min = base_min + nova_distancia_min
                 novo_max = base_max + nova_distancia_max
                 
-                # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 300
+                # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 50
                 novo_min = max(novo_min, -50.0)
-                novo_max = max(novo_max, 300.0)
+                novo_max = max(novo_max, 50.0)
                 
                 # Atualizar também o valor ativo (diminui proporcionalmente)
                 # Usando o centro do intervalo como referência

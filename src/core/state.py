@@ -12,7 +12,7 @@ from src.utils.temperature_converter import (
 @dataclass(frozen=True, slots=True)
 class AppState:
     temp_min: float = -50.0
-    temp_max: float = 300.0
+    temp_max: float = 50.0
     escala_ativa: str = STRINGS["escalas"]["celsius"]
     valor_ativo: float = 20.0
     arrastando: Optional[str] = None
