@@ -1,5 +1,5 @@
 from typing import Dict
-from ..config.settings import STRINGS
+from ..temperature_types import TemperatureScale
 
 
 def celsius_to_kelvin(c: float) -> float:
@@ -18,18 +18,18 @@ def fahrenheit_to_celsius(f: float) -> float:
     return (f - 32.0) * 5.0 / 9.0
 
 
-def converter(valor: float, de: str, para: str) -> float:
+def converter(valor: float, de: TemperatureScale, para: TemperatureScale) -> float:
     if de == para:
         return valor
-    if de == STRINGS["escalas"]["celsius"]:
-        if para == STRINGS["escalas"]["kelvin"]:
+    if de == TemperatureScale.CELSIUS:
+        if para == TemperatureScale.KELVIN:
             return celsius_to_kelvin(valor)
-        if para == STRINGS["escalas"]["fahrenheit"]:
+        if para == TemperatureScale.FAHRENHEIT:
             return celsius_to_fahrenheit(valor)
-    if de == STRINGS["escalas"]["kelvin"]:
+    if de == TemperatureScale.KELVIN:
         c = kelvin_to_celsius(valor)
-        return c if para == STRINGS["escalas"]["celsius"] else celsius_to_fahrenheit(c)
-    if de == STRINGS["escalas"]["fahrenheit"]:
+        return c if para == TemperatureScale.CELSIUS else celsius_to_fahrenheit(c)
+    if de == TemperatureScale.FAHRENHEIT:
         c = fahrenheit_to_celsius(valor)
-        return c if para == STRINGS["escalas"]["celsius"] else celsius_to_kelvin(c)
+        return c if para == TemperatureScale.CELSIUS else celsius_to_kelvin(c)
     raise ValueError(f"Conversão inválida: {de} -> {para}")
