@@ -1,7 +1,13 @@
 from dataclasses import dataclass
 from typing import Optional, Dict
 from src.config.settings import STRINGS
-from src.utils.temperature_converter import celsius_to_kelvin, celsius_to_fahrenheit, kelvin_to_celsius, fahrenheit_to_celsius
+from src.utils.temperature_converter import (
+    celsius_to_kelvin,
+    celsius_to_fahrenheit,
+    kelvin_to_celsius,
+    fahrenheit_to_celsius,
+)
+
 
 @dataclass(frozen=True, slots=True)
 class AppState:
@@ -36,20 +42,26 @@ class AppState:
 
     def clamp_valor(self, valor: float) -> float:
         return max(self.temp_min, min(self.temp_max, valor))
-    
+
     def atinge_limite_maximo(self) -> bool:
         """Verifica se algum dos valores atingiu o limite máximo."""
         valores = self.valores()
         # Verifica se qualquer escala atingiu seu limite máximo real (não os limites configurados)
         # Zero absoluto em Kelvin é 0K, e o limite superior é arbitrário mas deve ser respeitado
-        return (valores[STRINGS["escalas"]["celsius"]] >= self.temp_max or
-                valores[STRINGS["escalas"]["kelvin"]] >= celsius_to_kelvin(self.temp_max) or
-                valores[STRINGS["escalas"]["fahrenheit"]] >= celsius_to_fahrenheit(self.temp_max))
-    
+        return (
+            valores[STRINGS["escalas"]["celsius"]] >= self.temp_max
+            or valores[STRINGS["escalas"]["kelvin"]] >= celsius_to_kelvin(self.temp_max)
+            or valores[STRINGS["escalas"]["fahrenheit"]]
+            >= celsius_to_fahrenheit(self.temp_max)
+        )
+
     def atinge_limite_minimo(self) -> bool:
         """Verifica se algum dos valores atingiu o limite mínimo."""
         valores = self.valores()
         # Verifica se qualquer escala atingiu seu limite mínimo real
-        return (valores[STRINGS["escalas"]["celsius"]] <= self.temp_min or
-                valores[STRINGS["escalas"]["kelvin"]] <= celsius_to_kelvin(self.temp_min) or
-                valores[STRINGS["escalas"]["fahrenheit"]] <= celsius_to_fahrenheit(self.temp_min))
+        return (
+            valores[STRINGS["escalas"]["celsius"]] <= self.temp_min
+            or valores[STRINGS["escalas"]["kelvin"]] <= celsius_to_kelvin(self.temp_min)
+            or valores[STRINGS["escalas"]["fahrenheit"]]
+            <= celsius_to_fahrenheit(self.temp_min)
+        )
