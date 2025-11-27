@@ -336,3 +336,4 @@ config.local.*
 *.xml
 *.exe
 dist/
+.roo/

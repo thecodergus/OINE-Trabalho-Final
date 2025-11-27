@@ -10,6 +10,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "aider-install>=0.2.0",
     "black>=25.11.0",
     "pyinstaller>=6.16.0",
     "pytest>=9.0.1",
