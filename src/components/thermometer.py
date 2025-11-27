@@ -3,6 +3,7 @@ from typing import Tuple, Optional
 from ..core.state import AppState
 from ..temperature_types import TemperatureScale
 from .thermometer_renderer import TermometroRenderer
+from ..config.settings import THUMB_RAIO
 
 
 class Termometro:
