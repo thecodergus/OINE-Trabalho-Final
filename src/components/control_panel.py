@@ -17,6 +17,7 @@ from ..config.settings import (
     FAIXA_LABEL_Y,
 )
 from ..core.state import AppState
+from ..temperature_types import TemperatureScale
 
 
 class PainelControle:
@@ -138,8 +139,8 @@ class PainelControle:
         # Desenha apenas os botões e o texto
 
         escala_ativa = state.escala_ativa
-        min_convertido = converter(state.temp_min, "C", escala_ativa.symbol)
-        max_convertido = converter(state.temp_max, "C", escala_ativa.symbol)
+        min_convertido = converter(state.temp_min, TemperatureScale.CELSIUS, escala_ativa)
+        max_convertido = converter(state.temp_max, TemperatureScale.CELSIUS, escala_ativa)
 
         fonte = pygame.font.SysFont(*FONTES["rotulo"])
         txt = fonte.render(
