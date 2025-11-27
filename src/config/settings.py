@@ -1,6 +1,6 @@
 from typing import Tuple, Dict, List
 import os
-from src.temperature_types import TemperatureScale
+from ..temperature_types import TemperatureScale
 
 # Strings para internacionalização
 STRINGS = {
@@ -11,7 +11,7 @@ STRINGS = {
     "escalas": {
         TemperatureScale.KELVIN: "K",
         TemperatureScale.CELSIUS: "°C",
-        TemperatureScale.FAHRENHEIT: "°F"
+        TemperatureScale.FAHRENHEIT: "°F",
     },
 }
 
