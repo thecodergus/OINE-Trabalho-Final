@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional, Dict
-from src.temperature_types import TemperatureScale
-from src.config.settings import STRINGS
-from src.utils.temperature_converter import (
+from ..temperature_types import TemperatureScale
+from ..config.settings import STRINGS
+from ..utils.temperature_converter import (
     celsius_to_kelvin,
     celsius_to_fahrenheit,
     kelvin_to_celsius,
@@ -49,9 +49,10 @@ class AppState:
         valores = self.valores()
         # Verifica se qualquer escala atingiu seu limite máximo absoluto
         return (
-            valores[TemperatureScale.CELSIUS] >= self.temp_max or
-            valores[TemperatureScale.KELVIN] >= celsius_to_kelvin(self.temp_max) or
-            valores[TemperatureScale.FAHRENHEIT] >= celsius_to_fahrenheit(self.temp_max)
+            valores[TemperatureScale.CELSIUS] >= self.temp_max
+            or valores[TemperatureScale.KELVIN] >= celsius_to_kelvin(self.temp_max)
+            or valores[TemperatureScale.FAHRENHEIT]
+            >= celsius_to_fahrenheit(self.temp_max)
         )
 
     def atinge_limite_minimo(self) -> bool:
@@ -59,9 +60,10 @@ class AppState:
         valores = self.valores()
         # Verifica se qualquer escala atingiu seu limite mínimo absoluto
         return (
-            valores[TemperatureScale.CELSIUS] <= self.temp_min or
-            valores[TemperatureScale.KELVIN] <= celsius_to_kelvin(self.temp_min) or
-            valores[TemperatureScale.FAHRENHEIT] <= celsius_to_fahrenheit(self.temp_min)
+            valores[TemperatureScale.CELSIUS] <= self.temp_min
+            or valores[TemperatureScale.KELVIN] <= celsius_to_kelvin(self.temp_min)
+            or valores[TemperatureScale.FAHRENHEIT]
+            <= celsius_to_fahrenheit(self.temp_min)
         )
 
     def pode_aumentar(self) -> bool:
