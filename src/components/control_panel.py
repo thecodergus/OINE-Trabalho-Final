@@ -4,6 +4,7 @@ from src.config.settings import (
     BOTAO_RAIO, BOTAO_Y, BOTAO_MAIS_X, BOTAO_MENOS_X, FAIXA_LABEL_Y
 )
 from src.core.state import AppState
+from src.utils.temperature_converter import celsius_to_kelvin, celsius_to_fahrenheit, kelvin_to_celsius, fahrenheit_to_celsius
 
 class PainelControle:
     def __init__(self, rect: tuple) -> None:
@@ -20,7 +21,7 @@ class PainelControle:
             BOTAO_RAIO * 2,
             BOTAO_RAIO * 2,
         )
-        self.min_intervalo = 10.0
+        self.incremento = 10.0
 
     def handle_event(self, event: pygame.event.Event, state: AppState) -> AppState:
         if state.arrastando is not None:
@@ -30,31 +31,33 @@ class PainelControle:
             
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.botao_mais.collidepoint(event.pos):
-                novo_max = state.temp_max + 10
-                if novo_max - state.temp_min >= self.min_intervalo:
-                    novo_valor = min(state.valor_ativo, novo_max)
-                    novo_state = AppState(
-                        temp_min=state.temp_min,
-                        temp_max=novo_max,
-                        escala_ativa=state.escala_ativa,
-                        valor_ativo=novo_valor,
-                        arrastando=state.arrastando,
-                        botao_mais_pressionado=True,
-                        botao_menos_pressionado=state.botao_menos_pressionado
-                    )
+                # Aumentar proporcionalmente o valor atual
+                novo_valor = state.valor_ativo + self.incremento
+                novo_valor = min(novo_valor, state.temp_max)  # Não ultrapassar o limite máximo
+                
+                novo_state = AppState(
+                    temp_min=state.temp_min,
+                    temp_max=state.temp_max,
+                    escala_ativa=state.escala_ativa,
+                    valor_ativo=novo_valor,
+                    arrastando=state.arrastando,
+                    botao_mais_pressionado=True,
+                    botao_menos_pressionado=state.botao_menos_pressionado
+                )
             if self.botao_menos.collidepoint(event.pos):
-                novo_min = state.temp_min - 10
-                if state.temp_max - novo_min >= self.min_intervalo:
-                    novo_valor = max(state.valor_ativo, novo_min)
-                    novo_state = AppState(
-                        temp_min=novo_min,
-                        temp_max=state.temp_max,
-                        escala_ativa=state.escala_ativa,
-                        valor_ativo=novo_valor,
-                        arrastando=state.arrastando,
-                        botao_mais_pressionado=state.botao_mais_pressionado,
-                        botao_menos_pressionado=True
-                    )
+                # Diminuir proporcionalmente o valor atual
+                novo_valor = state.valor_ativo - self.incremento
+                novo_valor = max(novo_valor, state.temp_min)  # Não ultrapassar o limite mínimo
+                
+                novo_state = AppState(
+                    temp_min=state.temp_min,
+                    temp_max=state.temp_max,
+                    escala_ativa=state.escala_ativa,
+                    valor_ativo=novo_valor,
+                    arrastando=state.arrastando,
+                    botao_mais_pressionado=state.botao_mais_pressionado,
+                    botao_menos_pressionado=True
+                )
                     
         elif event.type == pygame.MOUSEBUTTONUP:
             if state.botao_mais_pressionado or state.botao_menos_pressionado:
