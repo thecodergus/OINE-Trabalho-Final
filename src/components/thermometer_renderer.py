@@ -79,6 +79,9 @@ class TermometroRenderer:
         valor = state.valores()[self.escala]
         nivel = (valor - state.temp_min) / (state.temp_max - state.temp_min)
         nivel_px = int(self.h * nivel)
+        # Garantir que o retângulo de preenchimento não ultrapasse os limites do termômetro
+        if nivel_px > self.h:
+            nivel_px = self.h
         rect_preenchido = pygame.Rect(
             self.x, self.y + self.h - nivel_px, self.w, nivel_px
         )

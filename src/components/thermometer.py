@@ -72,7 +72,6 @@ class Termometro:
     ) -> Optional[AppState]:
         if state.arrastando == self.escala.value and getattr(event, "pos", None):
             mouse_x, mouse_y = event.pos
-            novo_valor = self.valor_para_y(mouse_y, state.temp_min, state.temp_max)
             novo_valor = self.y_para_valor(mouse_y, state.temp_min, state.temp_max)
             novo_valor = state.clamp_valor(novo_valor)
 
