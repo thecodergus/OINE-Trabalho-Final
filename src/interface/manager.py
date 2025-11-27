@@ -1,10 +1,20 @@
 import pygame
-from src.config.settings import TERMOMETRO_XS, STRINGS, PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H, MATERIAL_XS, MATERIAIS
+from src.config.settings import (
+    TERMOMETRO_XS,
+    STRINGS,
+    PAINEL_X,
+    PAINEL_Y,
+    PAINEL_W,
+    PAINEL_H,
+    MATERIAL_XS,
+    MATERIAIS,
+)
 from src.components.thermometer import Termometro
 from src.components.control_panel import PainelControle
 from src.components.material_display import MaterialDisplay
 from src.core.state import AppState
 from src.temperature_types import TemperatureScale
+
 
 class InterfaceManager:
     def __init__(self) -> None:
@@ -26,6 +36,7 @@ class InterfaceManager:
             novo = termo.handle_event(event, state)
             if novo is not None and novo != state:
                 return novo
+        # Agora corretamente retorna o estado do painel de controle
         return self.painel_controle.handle_event(event, state)
 
     def render(self, surface: pygame.Surface, state: AppState) -> None:

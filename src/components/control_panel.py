@@ -139,8 +139,14 @@ class PainelControle:
         # Desenha apenas os botões e o texto
 
         escala_ativa = state.escala_ativa
-        min_convertido = converter(state.temp_min, TemperatureScale.CELSIUS, escala_ativa)
-        max_convertido = converter(state.temp_max, TemperatureScale.CELSIUS, escala_ativa)
+        min_convertido = converter(
+            state.temp_min, TemperatureScale.CELSIUS, escala_ativa
+        )
+        max_convertido = converter(
+            state.temp_max, TemperatureScale.CELSIUS, escala_ativa
+        )
+
+        print(f"MAX: {state.temp_min} | MIN: {state.temp_max}")
 
         fonte = pygame.font.SysFont(*FONTES["rotulo"])
         txt = fonte.render(
