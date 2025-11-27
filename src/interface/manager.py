@@ -4,13 +4,14 @@ from src.components.thermometer import Termometro
 from src.components.control_panel import PainelControle
 from src.components.material_display import MaterialDisplay
 from src.core.state import AppState
+from src.types import TemperatureScale
 
 class InterfaceManager:
     def __init__(self) -> None:
         self.termometros = [
-            Termometro(TERMOMETRO_XS[0], STRINGS["escalas"]["kelvin"]),
-            Termometro(TERMOMETRO_XS[1], STRINGS["escalas"]["celsius"]),
-            Termometro(TERMOMETRO_XS[2], STRINGS["escalas"]["fahrenheit"]),
+            Termometro(TERMOMETRO_XS[0], TemperatureScale.KELVIN),
+            Termometro(TERMOMETRO_XS[1], TemperatureScale.CELSIUS),
+            Termometro(TERMOMETRO_XS[2], TemperatureScale.FAHRENHEIT),
         ]
         self.painel_controle = PainelControle(
             rect=(PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H)

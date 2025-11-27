@@ -9,9 +9,9 @@ STRINGS = {
     "botao_menos": "−",
     "materiais": {"agua": "Água", "vidro": "Vidro", "aluminio": "Alumínio"},
     "escalas": {
-        "kelvin": TemperatureScale.KELVIN,
-        "celsius": TemperatureScale.CELSIUS,
-        "fahrenheit": TemperatureScale.FAHRENHEIT
+        TemperatureScale.KELVIN: "K",
+        TemperatureScale.CELSIUS: "°C",
+        TemperatureScale.FAHRENHEIT: "°F"
     },
 }
 
