@@ -29,18 +29,31 @@ class PainelControle:
             
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.botao_mais.collidepoint(event.pos):
-                # Quando + é selecionado:
-                # - menor valor recebe 'valor_atual - 150'
-                # - maior valor recebe 'valor_atual + 150'
-                novo_min = state.valor_ativo - 150
-                novo_max = state.valor_ativo + 150
+                # Quando + é selecionado: multiplicar os valores por 2
+                # Baseado na temperatura (-50, 50) ºC
+                base_min = -50.0
+                base_max = 50.0
+                
+                # Calcular a distância dos valores atuais em relação à base
+                distancia_min = state.temp_min - base_min
+                distancia_max = state.temp_max - base_max
+                
+                # Multiplicar as distâncias por 2
+                nova_distancia_min = distancia_min * 2
+                nova_distancia_max = distancia_max * 2
+                
+                # Calcular os novos valores
+                novo_min = base_min + nova_distancia_min
+                novo_max = base_max + nova_distancia_max
                 
                 # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 300
                 novo_min = max(novo_min, -50.0)
                 novo_max = max(novo_max, 300.0)
                 
-                # Atualizar também o valor ativo (aumenta 10 unidades)
-                novo_valor = state.valor_ativo + 10
+                # Atualizar também o valor ativo (aumenta proporcionalmente)
+                distancia_valor = state.valor_ativo - base_max  # Usando base_max como referência
+                nova_distancia_valor = distancia_valor * 2
+                novo_valor = base_max + nova_distancia_valor
                 # Garantir que o valor esteja dentro dos novos limites
                 novo_valor = max(novo_min, min(novo_max, novo_valor))
                 
@@ -54,18 +67,31 @@ class PainelControle:
                     botao_menos_pressionado=state.botao_menos_pressionado
                 )
             if self.botao_menos.collidepoint(event.pos):
-                # Quando - é selecionado:
-                # - menor valor recebe 'valor_atual + 150' 
-                # - maior valor recebe 'valor_atual - 150'
-                novo_min = state.valor_ativo + 150
-                novo_max = state.valor_ativo - 150
+                # Quando - é selecionado: dividir os valores por 2
+                # Baseado na temperatura (-50, 50) ºC
+                base_min = -50.0
+                base_max = 50.0
+                
+                # Calcular a distância dos valores atuais em relação à base
+                distancia_min = state.temp_min - base_min
+                distancia_max = state.temp_max - base_max
+                
+                # Dividir as distâncias por 2
+                nova_distancia_min = distancia_min / 2
+                nova_distancia_max = distancia_max / 2
+                
+                # Calcular os novos valores
+                novo_min = base_min + nova_distancia_min
+                novo_max = base_max + nova_distancia_max
                 
                 # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 300
                 novo_min = max(novo_min, -50.0)
                 novo_max = max(novo_max, 300.0)
                 
-                # Atualizar também o valor ativo (diminui 10 unidades)
-                novo_valor = state.valor_ativo - 10
+                # Atualizar também o valor ativo (diminui proporcionalmente)
+                distancia_valor = state.valor_ativo - base_max  # Usando base_max como referência
+                nova_distancia_valor = distancia_valor / 2
+                novo_valor = base_max + nova_distancia_valor
                 # Garantir que o valor esteja dentro dos novos limites
                 novo_valor = max(novo_min, min(novo_max, novo_valor))
                 
