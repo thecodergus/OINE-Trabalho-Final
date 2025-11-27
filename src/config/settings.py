@@ -49,19 +49,21 @@ THUMB_RAIO = 18
 BASE_RAIO = 25  # Aumentado de 22 para 25
 
 
-# Espaçamento dinâmico centralizado (com deslocamento para a direita)
+# Defina um deslocamento fixo (em pixels) para mover os termômetros para a direita
+DESLOCAMENTO_TERMOMETROS = 80  # Ajuste esse valor conforme necessário
+
+
 def calcular_termometro_xs() -> Tuple[int, int, int]:
-    # Calcular margem esquerda aumentada (200 pixels a mais)
     margem_lateral_original = 159
-    margem_lateral = int(margem_lateral_original * 0.8) + 200  # 20% menor + 200 pixels
-    area_util = (
-        TELA_LARGURA - 2 * margem_lateral - 150
-    )  # Reduzir área útil para afastar do painel
+    margem_lateral = int(margem_lateral_original * 0.8) + 50
+    area_util = TELA_LARGURA - 2 * margem_lateral - 150
     espacamento = (area_util - TERMOMETRO_COUNT * TERMOMETRO_DIM[0]) // (
         TERMOMETRO_COUNT - 1
     )
     xs = [
-        margem_lateral + i * (TERMOMETRO_DIM[0] + espacamento)
+        margem_lateral
+        + i * (TERMOMETRO_DIM[0] + espacamento)
+        + DESLOCAMENTO_TERMOMETROS
         for i in range(TERMOMETRO_COUNT)
     ]
     return (xs[0], xs[1], xs[2])
@@ -70,17 +72,17 @@ def calcular_termometro_xs() -> Tuple[int, int, int]:
 TERMOMETRO_XS = calcular_termometro_xs()
 
 # Painel lateral direito (movido para cima, quase no topo)
-PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H = 860, 10, 120, 180  # Y mudou de 77 para 10
+PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H = 890, 10, 120, 180  # Y mudou de 77 para 10
 BOTAO_RAIO = 18
-BOTAO_Y = PAINEL_Y + 60
+BOTAO_Y = PAINEL_Y + 45
 BOTAO_MAIS_X = PAINEL_X + 80
 BOTAO_MENOS_X = PAINEL_X + 22
-FAIXA_LABEL_Y = PAINEL_Y + 20
+FAIXA_LABEL_Y = PAINEL_Y
 
 # Materiais (parte inferior) - centralizados
 MATERIAL_IMG_DIM = (120, 88)
-MATERIAL_IMG_Y = 549
-MATERIAL_LABEL_Y = MATERIAL_IMG_Y - 48
+MATERIAL_IMG_Y = 600
+MATERIAL_LABEL_Y = MATERIAL_IMG_Y + MATERIAL_IMG_DIM[1] + 10
 
 
 # Calcular posições dos materiais centralizadas
