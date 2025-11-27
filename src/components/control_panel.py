@@ -4,7 +4,6 @@ from src.config.settings import (
     BOTAO_RAIO, BOTAO_Y, BOTAO_MAIS_X, BOTAO_MENOS_X, FAIXA_LABEL_Y
 )
 from src.core.state import AppState
-from src.utils.temperature_converter import celsius_to_kelvin, celsius_to_fahrenheit, kelvin_to_celsius, fahrenheit_to_celsius
 
 class PainelControle:
     def __init__(self, rect: tuple) -> None:
@@ -31,13 +30,14 @@ class PainelControle:
             
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.botao_mais.collidepoint(event.pos):
-                # Aumentar proporcionalmente o valor atual
-                novo_valor = state.valor_ativo + self.incremento
-                novo_valor = min(novo_valor, state.temp_max)  # Não ultrapassar o limite máximo
+                # Aumentar a proporção (aumentar o limite máximo e manter o mínimo)
+                novo_max = state.temp_max + self.incremento
+                # Ajustar o valor ativo se necessário
+                novo_valor = min(state.valor_ativo, novo_max)
                 
                 novo_state = AppState(
                     temp_min=state.temp_min,
-                    temp_max=state.temp_max,
+                    temp_max=novo_max,
                     escala_ativa=state.escala_ativa,
                     valor_ativo=novo_valor,
                     arrastando=state.arrastando,
@@ -45,12 +45,13 @@ class PainelControle:
                     botao_menos_pressionado=state.botao_menos_pressionado
                 )
             if self.botao_menos.collidepoint(event.pos):
-                # Diminuir proporcionalmente o valor atual
-                novo_valor = state.valor_ativo - self.incremento
-                novo_valor = max(novo_valor, state.temp_min)  # Não ultrapassar o limite mínimo
+                # Diminuir a proporção (diminuir o limite mínimo e manter o máximo)
+                novo_min = state.temp_min - self.incremento
+                # Ajustar o valor ativo se necessário
+                novo_valor = max(state.valor_ativo, novo_min)
                 
                 novo_state = AppState(
-                    temp_min=state.temp_min,
+                    temp_min=novo_min,
                     temp_max=state.temp_max,
                     escala_ativa=state.escala_ativa,
                     valor_ativo=novo_valor,
