@@ -46,22 +46,27 @@ class AppState:
     def atinge_limite_maximo(self) -> bool:
         """Verifica se algum dos valores atingiu o limite máximo."""
         valores = self.valores()
-        # Verifica se qualquer escala atingiu seu limite máximo real (não os limites configurados)
-        # Zero absoluto em Kelvin é 0K, e o limite superior é arbitrário mas deve ser respeitado
+        # Verifica se qualquer escala atingiu seu limite máximo absoluto
         return (
-            valores[STRINGS["escalas"]["celsius"]] >= self.temp_max
-            or valores[STRINGS["escalas"]["kelvin"]] >= celsius_to_kelvin(self.temp_max)
-            or valores[STRINGS["escalas"]["fahrenheit"]]
-            >= celsius_to_fahrenheit(self.temp_max)
+            valores[STRINGS["escalas"]["celsius"]] >= self.temp_max or
+            valores[STRINGS["escalas"]["kelvin"]] >= celsius_to_kelvin(self.temp_max) or
+            valores[STRINGS["escalas"]["fahrenheit"]] >= celsius_to_fahrenheit(self.temp_max)
         )
 
     def atinge_limite_minimo(self) -> bool:
         """Verifica se algum dos valores atingiu o limite mínimo."""
         valores = self.valores()
-        # Verifica se qualquer escala atingiu seu limite mínimo real
+        # Verifica se qualquer escala atingiu seu limite mínimo absoluto
         return (
-            valores[STRINGS["escalas"]["celsius"]] <= self.temp_min
-            or valores[STRINGS["escalas"]["kelvin"]] <= celsius_to_kelvin(self.temp_min)
-            or valores[STRINGS["escalas"]["fahrenheit"]]
-            <= celsius_to_fahrenheit(self.temp_min)
+            valores[STRINGS["escalas"]["celsius"]] <= self.temp_min or
+            valores[STRINGS["escalas"]["kelvin"]] <= celsius_to_kelvin(self.temp_min) or
+            valores[STRINGS["escalas"]["fahrenheit"]] <= celsius_to_fahrenheit(self.temp_min)
         )
+
+    def pode_aumentar(self) -> bool:
+        """Verifica se é possível aumentar a temperatura."""
+        return not self.atinge_limite_maximo()
+
+    def pode_diminuir(self) -> bool:
+        """Verifica se é possível diminuir a temperatura."""
+        return not self.atinge_limite_minimo()
