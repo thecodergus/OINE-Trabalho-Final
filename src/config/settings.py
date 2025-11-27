@@ -52,7 +52,7 @@ TERMOMETRO_DIM = (32, 293)
 TERMOMETRO_Y = 111
 TERMOMETRO_COUNT = 3
 THUMB_RAIO = 18
-BASE_RAIO = 22
+BASE_RAIO = 25  # Aumentado de 22 para 25
 
 # Espaçamento dinâmico centralizado (com deslocamento para a esquerda)
 def calcular_termometro_xs() -> Tuple[int, int, int]:

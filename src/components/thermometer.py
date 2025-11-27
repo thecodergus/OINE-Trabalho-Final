@@ -18,7 +18,8 @@ class Termometro:
 
     def _criar_cache(self) -> None:
         if self._cache_surface is None or self._cache_rect != self.rect:
-            self._cache_surface = pygame.Surface((self.w, self.h + BASE_RAIO * 2), pygame.SRCALPHA)
+            # Aumentar a altura da superfície para acomodar a base maior
+            self._cache_surface = pygame.Surface((self.w, self.h + BASE_RAIO * 2 + 5), pygame.SRCALPHA)
             self._cache_rect = self.rect.copy()
             
             pygame.draw.rect(self._cache_surface, (240, 240, 240), 
@@ -27,7 +28,7 @@ class Termometro:
                            (0, 0, self.w, self.h), 2, border_radius=8)
             
             base_x = self.w // 2
-            base_y = self.h + BASE_RAIO
+            base_y = self.h + BASE_RAIO + 2  # Ajustado para posicionar corretamente
             pygame.draw.circle(self._cache_surface, CORES["indicador"], (base_x, base_y), BASE_RAIO)
             pygame.draw.circle(self._cache_surface, CORES["texto"], (base_x, base_y), BASE_RAIO, 2)
 
@@ -47,7 +48,7 @@ class Termometro:
         return (x, y)
 
     def base_pos(self) -> Tuple[int, int]:
-        return (self.x + self.w // 2, self.y + self.h)
+        return (self.x + self.w // 2, self.y + self.h + BASE_RAIO + 2)
 
     def handle_event(self, event: pygame.event.Event, state: AppState) -> Optional[AppState]:
         thumb_x, thumb_y = self.thumb_pos(state)
