@@ -47,7 +47,7 @@ FONTES = {
 
 TELA_LARGURA, TELA_ALTURA = 1024, 768
 
-# Termômetros (movidos 50 pixels para a direita)
+# Termômetros (movidos 100 pixels para a direita)
 TERMOMETRO_DIM = (32, 293)
 TERMOMETRO_Y = 111
 TERMOMETRO_COUNT = 3
@@ -56,9 +56,9 @@ BASE_RAIO = 25  # Aumentado de 22 para 25
 
 # Espaçamento dinâmico centralizado (com deslocamento para a direita)
 def calcular_termometro_xs() -> Tuple[int, int, int]:
-    # Calcular margem esquerda aumentada (50 pixels a mais)
+    # Calcular margem esquerda aumentada (100 pixels a mais)
     margem_lateral_original = 159
-    margem_lateral = int(margem_lateral_original * 0.8) + 50  # 20% menor + 50 pixels
+    margem_lateral = int(margem_lateral_original * 0.8) + 100  # 20% menor + 100 pixels
     area_util = TELA_LARGURA - 2 * margem_lateral - 150  # Reduzir área útil para afastar do painel
     espacamento = (area_util - TERMOMETRO_COUNT * TERMOMETRO_DIM[0]) // (TERMOMETRO_COUNT - 1)
     xs = [
