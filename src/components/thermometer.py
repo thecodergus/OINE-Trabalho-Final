@@ -84,8 +84,15 @@ class Termometro:
                 novo_valor = self.y_para_valor(mouse_y, state.temp_min, state.temp_max)
                 novo_valor = state.clamp_valor(novo_valor)
                 
-                # Criar um estado temporário para verificar os limites
-                temp_state = AppState(
+                # Verificar se está tentando aumentar além do limite máximo
+                if novo_valor > state.valor_ativo and state.atinge_limite_maximo():
+                    return None
+                
+                # Verificar se está tentando diminuir além do limite mínimo
+                if novo_valor < state.valor_ativo and state.atinge_limite_minimo():
+                    return None
+                
+                return AppState(
                     temp_min=state.temp_min,
                     temp_max=state.temp_max,
                     escala_ativa=self.escala,
@@ -94,16 +101,6 @@ class Termometro:
                     botao_mais_pressionado=state.botao_mais_pressionado,
                     botao_menos_pressionado=state.botao_menos_pressionado
                 )
-                
-                # Verificar se está tentando aumentar além do limite máximo
-                if novo_valor > state.valor_ativo and temp_state.atinge_limite_maximo():
-                    return None
-                
-                # Verificar se está tentando diminuir além do limite mínimo
-                if novo_valor < state.valor_ativo and temp_state.atinge_limite_minimo():
-                    return None
-                
-                return temp_state
         return None
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
