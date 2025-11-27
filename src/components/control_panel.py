@@ -51,9 +51,12 @@ class PainelControle:
                 novo_max = max(novo_max, 300.0)
                 
                 # Atualizar também o valor ativo (aumenta proporcionalmente)
-                distancia_valor = state.valor_ativo - base_max  # Usando base_max como referência
-                nova_distancia_valor = distancia_valor * 2
-                novo_valor = base_max + nova_distancia_valor
+                # Usando o centro do intervalo como referência
+                centro_atual = (state.temp_min + state.temp_max) / 2
+                centro_novo = (novo_min + novo_max) / 2
+                distancia_centro = state.valor_ativo - centro_atual
+                nova_distancia_centro = distancia_centro * 2
+                novo_valor = centro_novo + nova_distancia_centro
                 # Garantir que o valor esteja dentro dos novos limites
                 novo_valor = max(novo_min, min(novo_max, novo_valor))
                 
@@ -89,9 +92,12 @@ class PainelControle:
                 novo_max = max(novo_max, 300.0)
                 
                 # Atualizar também o valor ativo (diminui proporcionalmente)
-                distancia_valor = state.valor_ativo - base_max  # Usando base_max como referência
-                nova_distancia_valor = distancia_valor / 2
-                novo_valor = base_max + nova_distancia_valor
+                # Usando o centro do intervalo como referência
+                centro_atual = (state.temp_min + state.temp_max) / 2
+                centro_novo = (novo_min + novo_max) / 2
+                distancia_centro = state.valor_ativo - centro_atual
+                nova_distancia_centro = distancia_centro / 2
+                novo_valor = centro_novo + nova_distancia_centro
                 # Garantir que o valor esteja dentro dos novos limites
                 novo_valor = max(novo_min, min(novo_max, novo_valor))
                 
