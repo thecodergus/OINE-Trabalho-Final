@@ -47,17 +47,16 @@ FONTES = {
 
 TELA_LARGURA, TELA_ALTURA = 1024, 768
 
-# Termômetros
+# Termômetros (movidos 20% para a esquerda)
 TERMOMETRO_DIM = (32, 293)
 TERMOMETRO_Y = 111
 TERMOMETRO_COUNT = 3
-TERMOMETRO_ESCALAS = [STRINGS["escalas"]["kelvin"], STRINGS["escalas"]["celsius"], STRINGS["escalas"]["fahrenheit"]]
-THUMB_RAIO = 18
-BASE_RAIO = 22
 
-# Espaçamento dinâmico centralizado
+# Espaçamento dinâmico centralizado (com deslocamento para a esquerda)
 def calcular_termometro_xs() -> Tuple[int, int, int]:
-    margem_lateral = 159
+    # Calcular margem esquerda reduzida (20% menor)
+    margem_lateral_original = 159
+    margem_lateral = int(margem_lateral_original * 0.8)  # 20% menor
     area_util = TELA_LARGURA - 2 * margem_lateral
     espacamento = (area_util - TERMOMETRO_COUNT * TERMOMETRO_DIM[0]) // (TERMOMETRO_COUNT - 1)
     xs = [
@@ -68,19 +67,30 @@ def calcular_termometro_xs() -> Tuple[int, int, int]:
 
 TERMOMETRO_XS = calcular_termometro_xs()
 
-# Painel lateral direito
-PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H = 860, 77, 120, 180
+# Painel lateral direito (movido para cima, quase no topo)
+PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H = 860, 10, 120, 180  # Y mudou de 77 para 10
 BOTAO_RAIO = 18
 BOTAO_Y = PAINEL_Y + 60
 BOTAO_MAIS_X = PAINEL_X + 80
 BOTAO_MENOS_X = PAINEL_X + 22
 FAIXA_LABEL_Y = PAINEL_Y + 20
 
-# Materiais (parte inferior)
+# Materiais (parte inferior) - também movidos para a esquerda
 MATERIAL_IMG_DIM = (120, 88)
 MATERIAL_IMG_Y = 549
 MATERIAL_LABEL_Y = MATERIAL_IMG_Y - 48
-MATERIAL_XS = [159, 444, 717]
+
+# Calcular posições dos materiais com o mesmo deslocamento
+def calcular_material_xs() -> List[int]:
+    margem_lateral_original = 159
+    margem_lateral = int(margem_lateral_original * 0.8)  # 20% menor
+    # Calcular posições igualmente espaçadas
+    espaco_total = TELA_LARGURA - 2 * margem_lateral
+    espaco_entre = espaco_total // (3 - 1) if 3 > 1 else 0
+    return [margem_lateral + i * espaco_entre for i in range(3)]
+
+MATERIAL_XS = calcular_material_xs()
+
 MATERIAIS = [
     (STRINGS["materiais"]["agua"], "src/assets/imagem_generica.jpg"),
     (STRINGS["materiais"]["vidro"], "src/assets/imagem_generica.jpg"),
