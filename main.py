@@ -184,7 +184,8 @@ class Termometro:
         thumb_x, thumb_y = self.thumb_pos(state)
         mouse_x, mouse_y = getattr(event, "pos", (None, None))
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if (mouse_x is not None and
+            if (mouse_x is not None and 
+                mouse_y is not None and
                 (thumb_x - THUMB_RAIO) <= mouse_x <= (thumb_x + THUMB_RAIO) and
                 (thumb_y - THUMB_RAIO) <= mouse_y <= (thumb_y + THUMB_RAIO)):
                 return replace(state, arrastando=self.escala)
