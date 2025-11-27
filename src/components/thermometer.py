@@ -5,9 +5,10 @@ from src.config.settings import (
     FONTES, TERMOMETRO_XS, STRINGS
 )
 from src.core.state import AppState
+from src.types import TemperatureScale
 
 class Termometro:
-    def __init__(self, x: int, escala: str) -> None:
+    def __init__(self, x: int, escala: TemperatureScale) -> None:
         self.x = x
         self.y = TERMOMETRO_Y
         self.w, self.h = TERMOMETRO_DIM
@@ -60,12 +61,12 @@ class Termometro:
                     temp_max=state.temp_max,
                     escala_ativa=self.escala,
                     valor_ativo=state.valor_ativo,
-                    arrastando=self.escala,
+                    arrastando=self.escala.value,
                     botao_mais_pressionado=state.botao_mais_pressionado,
                     botao_menos_pressionado=state.botao_menos_pressionado
                 )
         elif event.type == pygame.MOUSEBUTTONUP:
-            if state.arrastando == self.escala:
+            if state.arrastando == self.escala.value:
                 return AppState(
                     temp_min=state.temp_min,
                     temp_max=state.temp_max,
@@ -76,7 +77,7 @@ class Termometro:
                     botao_menos_pressionado=state.botao_menos_pressionado
                 )
         elif event.type == pygame.MOUSEMOTION:
-            if state.arrastando == self.escala and mouse_y is not None:
+            if state.arrastando == self.escala.value and mouse_y is not None:
                 novo_valor = self.y_para_valor(mouse_y, state.temp_min, state.temp_max)
                 novo_valor = state.clamp_valor(novo_valor)
                 
@@ -93,7 +94,7 @@ class Termometro:
                     temp_max=state.temp_max,
                     escala_ativa=state.escala_ativa,  # Manter a escala ativa original
                     valor_ativo=novo_valor,
-                    arrastando=self.escala,
+                    arrastando=self.escala.value,
                     botao_mais_pressionado=state.botao_mais_pressionado,
                     botao_menos_pressionado=state.botao_menos_pressionado
                 )
@@ -128,5 +129,5 @@ class Termometro:
         
         # Desenhar o texto com o valor
         fonte = pygame.font.SysFont(*FONTES["valor"])
-        txt = fonte.render(f"{valor:.2f} {self.escala}", True, CORES["texto"])
+        txt = fonte.render(f"{valor:.2f} {self.escala.symbol}", True, CORES["texto"])
         surf.blit(txt, (self.x + (self.w - txt.get_width()) // 2, self.y - 48))

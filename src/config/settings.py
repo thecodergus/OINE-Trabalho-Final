@@ -1,5 +1,6 @@
 from typing import Tuple, Dict, List
 import os
+from src.types import TemperatureScale
 
 # Strings para internacionalização
 STRINGS = {
@@ -7,7 +8,11 @@ STRINGS = {
     "botao_mais": "+",
     "botao_menos": "−",
     "materiais": {"agua": "Água", "vidro": "Vidro", "aluminio": "Alumínio"},
-    "escalas": {"kelvin": "K", "celsius": "°C", "fahrenheit": "°F"},
+    "escalas": {
+        "kelvin": TemperatureScale.KELVIN,
+        "celsius": TemperatureScale.CELSIUS,
+        "fahrenheit": TemperatureScale.FAHRENHEIT
+    },
 }
 
 
