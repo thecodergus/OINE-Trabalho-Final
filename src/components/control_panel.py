@@ -48,9 +48,9 @@ class PainelControle:
                     botao_menos_pressionado=state.botao_menos_pressionado
                 )
             if self.botao_menos.collidepoint(event.pos):
-                # Diminuir a proporção (dividir ambos os valores)
-                novo_min = state.temp_min / self.fator_escala
+                # Diminuir a proporção (dividir o maior valor por 2 e ajustar o menor)
                 novo_max = state.temp_max / self.fator_escala
+                novo_min = state.temp_min - (abs(state.temp_min) * self.fator_escala)
                 
                 # Ajustar o valor ativo proporcionalmente
                 proporcao = (state.valor_ativo - state.temp_min) / (state.temp_max - state.temp_min)
