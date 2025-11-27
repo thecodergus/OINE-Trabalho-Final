@@ -77,19 +77,20 @@ BOTAO_MAIS_X = PAINEL_X + 80
 BOTAO_MENOS_X = PAINEL_X + 22
 FAIXA_LABEL_Y = PAINEL_Y + 20
 
-# Materiais (parte inferior) - também movidos para a esquerda
+# Materiais (parte inferior) - centralizados
 MATERIAL_IMG_DIM = (120, 88)
 MATERIAL_IMG_Y = 549
 MATERIAL_LABEL_Y = MATERIAL_IMG_Y - 48
 
-# Calcular posições dos materiais com o mesmo deslocamento
+# Calcular posições dos materiais centralizadas
 def calcular_material_xs() -> List[int]:
-    margem_lateral_original = 159
-    margem_lateral = int(margem_lateral_original * 0.8)  # 20% menor
-    # Calcular posições igualmente espaçadas
-    espaco_total = TELA_LARGURA - 2 * margem_lateral
-    espaco_entre = espaco_total // (3 - 1) if 3 > 1 else 0
-    return [margem_lateral + i * espaco_entre for i in range(3)]
+    # Calcular posições centralizadas
+    espaco_total = TELA_LARGURA
+    espaco_entre = (espaco_total - (3 * MATERIAL_IMG_DIM[0])) // 4  # 4 espaços: antes, entre, entre, depois
+    return [
+        espaco_entre + i * (MATERIAL_IMG_DIM[0] + espaco_entre)
+        for i in range(3)
+    ]
 
 MATERIAL_XS = calcular_material_xs()
 
