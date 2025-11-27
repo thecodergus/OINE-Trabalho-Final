@@ -37,11 +37,14 @@ class PainelControle:
                 novo_min = max(novo_min, -50.0)
                 novo_max = max(novo_max, 300.0)
                 
+                # Atualizar também o valor ativo
+                novo_valor = min(max(state.valor_ativo + 10, novo_min), novo_max)
+                
                 novo_state = AppState(
                     temp_min=novo_min,
                     temp_max=novo_max,
                     escala_ativa=state.escala_ativa,
-                    valor_ativo=state.valor_ativo,
+                    valor_ativo=novo_valor,
                     arrastando=state.arrastando,
                     botao_mais_pressionado=True,
                     botao_menos_pressionado=state.botao_menos_pressionado
@@ -55,11 +58,14 @@ class PainelControle:
                 novo_min = max(novo_min, -50.0)
                 novo_max = max(novo_max, 300.0)
                 
+                # Atualizar também o valor ativo
+                novo_valor = min(max(state.valor_ativo - 10, novo_min), novo_max)
+                
                 novo_state = AppState(
                     temp_min=novo_min,
                     temp_max=novo_max,
                     escala_ativa=state.escala_ativa,
-                    valor_ativo=state.valor_ativo,
+                    valor_ativo=novo_valor,
                     arrastando=state.arrastando,
                     botao_mais_pressionado=state.botao_mais_pressionado,
                     botao_menos_pressionado=True
