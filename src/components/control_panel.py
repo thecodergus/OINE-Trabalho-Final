@@ -40,9 +40,9 @@ class PainelControle:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.botao_mais.collidepoint(event.pos):
                 # Quando + é selecionado: multiplicar os valores por 2
-                # Baseado na temperatura (-50, 50) ºC
-                base_min = -50.0
-                base_max = 50.0
+                # Baseado na temperatura (-100, 100) ºC
+                base_min = -100.0
+                base_max = 100.0
 
                 # Calcular a distância dos valores atuais em relação à base
                 distancia_min = state.temp_min - base_min
@@ -57,8 +57,8 @@ class PainelControle:
                 novo_max = base_max + nova_distancia_max
 
                 # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 50
-                novo_min = max(novo_min, -50.0)
-                novo_max = max(novo_max, 50.0)
+                novo_min = max(novo_min, -100.0)
+                novo_max = max(novo_max, 100.0)
 
                 # Atualizar também o valor ativo (aumenta proporcionalmente)
                 # Usando o centro do intervalo como referência
@@ -82,8 +82,8 @@ class PainelControle:
             if self.botao_menos.collidepoint(event.pos):
                 # Quando - é selecionado: dividir os valores por 2
                 # Baseado na temperatura (-50, 50) ºC
-                base_min = -50.0
-                base_max = 50.0
+                base_min = -100.0
+                base_max = 100.0
 
                 # Calcular a distância dos valores atuais em relação à base
                 distancia_min = state.temp_min - base_min
@@ -98,8 +98,8 @@ class PainelControle:
                 novo_max = base_max + nova_distancia_max
 
                 # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 50
-                novo_min = max(novo_min, -50.0)
-                novo_max = max(novo_max, 50.0)
+                novo_min = max(novo_min, -100.0)
+                novo_max = max(novo_max, 100.0)
 
                 # Atualizar também o valor ativo (diminui proporcionalmente)
                 # Usando o centro do intervalo como referência
