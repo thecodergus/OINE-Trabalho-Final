@@ -59,7 +59,7 @@ def calcular_termometro_xs() -> Tuple[int, int, int]:
     # Calcular margem esquerda reduzida (20% menor)
     margem_lateral_original = 159
     margem_lateral = int(margem_lateral_original * 0.8)  # 20% menor
-    area_util = TELA_LARGURA - 2 * margem_lateral
+    area_util = TELA_LARGURA - 2 * margem_lateral - 150  # Reduzir área útil para afastar do painel
     espacamento = (area_util - TERMOMETRO_COUNT * TERMOMETRO_DIM[0]) // (TERMOMETRO_COUNT - 1)
     xs = [
         margem_lateral + i * (TERMOMETRO_DIM[0] + espacamento)
