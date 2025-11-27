@@ -2,11 +2,11 @@ from dataclasses import dataclass
 from typing import Optional, Dict
 from ..temperature_types import TemperatureScale
 from ..config.settings import (
-    TEMP_MIN_INICIAL, 
-    TEMP_MAX_INICIAL, 
+    TEMP_MIN_INICIAL,
+    TEMP_MAX_INICIAL,
     VALOR_ATIVO_INICIAL,
     TEMP_MIN_LIMITE,
-    TEMP_MAX_LIMITE
+    TEMP_MAX_LIMITE,
 )
 from ..utils.temperature_converter import (
     celsius_to_kelvin,
@@ -50,24 +50,10 @@ class AppState:
     def clamp_valor(self, valor: float) -> float:
         return max(self.temp_min, min(self.temp_max, valor))
 
-    def atinge_limite_maximo(self) -> bool:
-        """Verifica se algum dos valores atingiu o limite máximo."""
-        # Usa os limites configurados em settings.py
-        return (
-            self.temp_max >= TEMP_MAX_LIMITE
-        )
-
-    def atinge_limite_minimo(self) -> bool:
-        """Verifica se algum dos valores atingiu o limite mínimo."""
-        # Usa os limites configurados em settings.py
-        return (
-            self.temp_min <= TEMP_MIN_LIMITE
-        )
-
-    def pode_aumentar(self) -> bool:
+    def pode_aumentar(self, temp: float) -> bool:
         """Verifica se é possível aumentar a temperatura."""
-        return not self.atinge_limite_maximo()
+        return not self.temp_min >= temp
 
-    def pode_diminuir(self) -> bool:
+    def pode_diminuir(self, temp: float) -> bool:
         """Verifica se é possível diminuir a temperatura."""
-        return not self.atinge_limite_minimo()
+        return not self.temp_max <= temp

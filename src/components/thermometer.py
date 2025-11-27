@@ -101,11 +101,15 @@ class Termometro:
                 novo_valor = state.clamp_valor(novo_valor)
 
                 # Verificar se está tentando aumentar além do limite máximo
-                if novo_valor > state.valor_ativo and not state.pode_aumentar():
+                if novo_valor > state.valor_ativo and not state.pode_aumentar(
+                    novo_valor
+                ):
                     return None
 
                 # Verificar se está tentando diminuir além do limite mínimo
-                if novo_valor < state.valor_ativo and not state.pode_diminuir():
+                if novo_valor < state.valor_ativo and not state.pode_diminuir(
+                    novo_valor
+                ):
                     return None
 
                 return AppState(
