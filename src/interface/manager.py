@@ -4,7 +4,7 @@ from src.components.thermometer import Termometro
 from src.components.control_panel import PainelControle
 from src.components.material_display import MaterialDisplay
 from src.core.state import AppState
-from src.types import TemperatureScale
+from src.temperature_types import TemperatureScale
 
 class InterfaceManager:
     def __init__(self) -> None:

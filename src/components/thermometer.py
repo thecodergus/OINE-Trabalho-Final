@@ -5,7 +5,7 @@ from src.config.settings import (
     FONTES, TERMOMETRO_XS, STRINGS
 )
 from src.core.state import AppState
-from src.types import TemperatureScale
+from src.temperature_types import TemperatureScale
 
 class Termometro:
     def __init__(self, x: int, escala: TemperatureScale) -> None:

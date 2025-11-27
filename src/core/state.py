@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional, Dict
-from src.types import TemperatureScale
+from src.temperature_types import TemperatureScale
 from src.config.settings import STRINGS
 from src.utils.temperature_converter import (
     celsius_to_kelvin,

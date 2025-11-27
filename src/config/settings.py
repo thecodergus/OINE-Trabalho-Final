@@ -1,6 +1,6 @@
 from typing import Tuple, Dict, List
 import os
-from src.types import TemperatureScale
+from src.temperature_types import TemperatureScale
 
 # Strings para internacionalização
 STRINGS = {
