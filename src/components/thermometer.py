@@ -101,7 +101,12 @@ class Termometro:
     def y_para_valor(self, y: int, temp_min: float, temp_max: float) -> float:
         y = max(self.renderer.y, min(self.renderer.y + self.renderer.h, y))
         ratio = (self.renderer.y + self.renderer.h - y) / self.renderer.h
-        return temp_min + ratio * (temp_max - temp_min)
+
+        # Converter os limites para a escala deste termômetro
+        temp_min_convertido = self.renderer.converter_para_escala(temp_min, TemperatureScale.CELSIUS, self.escala)
+        temp_max_convertido = self.renderer.converter_para_escala(temp_max, TemperatureScale.CELSIUS, self.escala)
+
+        return temp_min_convertido + ratio * (temp_max_convertido - temp_min_convertido)
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
         self.renderer.render(surf, state)

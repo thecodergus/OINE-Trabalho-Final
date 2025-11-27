@@ -48,14 +48,68 @@ class TermometroRenderer:
             )
 
     def valor_para_y(self, valor: float, temp_min: float, temp_max: float) -> int:
-        ratio = (valor - temp_min) / (temp_max - temp_min)
+        # Converter os limites para a escala deste termômetro
+        min_na_escala = self.converter_para_escala(temp_min, TemperatureScale.CELSIUS, self.escala)
+        max_na_escala = self.converter_para_escala(temp_max, TemperatureScale.CELSIUS, self.escala)
+
+        # Usar os limites específicos da escala para proporção
+        escala_min, escala_max = self._obter_limites_escala()
+
+        # Garantir que os valores estejam dentro dos limites da escala
+        min_na_escala = max(min_na_escala, escala_min)
+        max_na_escala = min(max_na_escala, escala_max)
+        valor = max(min(valor, max_na_escala), min_na_escala)
+
+        # Calcular proporção dentro da faixa visível
+        if max_na_escala - min_na_escala == 0:
+            ratio = 0
+        else:
+            ratio = (valor - min_na_escala) / (max_na_escala - min_na_escala)
+
+        # Inverter porque y cresce para baixo na tela
         return int(self.y + self.h - ratio * self.h)
 
     def thumb_pos(self, state: AppState) -> Tuple[int, int]:
         valor = state.valores()[self.escala]
-        y = self.valor_para_y(valor, state.temp_min, state.temp_max)
+        # Obter os limites atuais convertidos para esta escala
+        temp_min_convertido = self.converter_para_escala(state.temp_min, TemperatureScale.CELSIUS, self.escala)
+        temp_max_convertido = self.converter_para_escala(state.temp_max, TemperatureScale.CELSIUS, self.escala)
+        y = self.valor_para_y(valor, temp_min_convertido, temp_max_convertido)
         x = self.x + self.w // 2
         return (x, y)
+
+    def converter_para_escala(self, valor: float, de: TemperatureScale, para: TemperatureScale) -> float:
+        """Converte um valor de uma escala para outra."""
+        if de == para:
+            return valor
+
+        # Converter para Celsius primeiro
+        if de == TemperatureScale.KELVIN:
+            valor_celsius = valor - 273.15
+        elif de == TemperatureScale.FAHRENHEIT:
+            valor_celsius = (valor - 32.0) * 5.0 / 9.0
+        else:  # Celsius
+            valor_celsius = valor
+
+        # Converter de Celsius para a escala desejada
+        if para == TemperatureScale.KELVIN:
+            return valor_celsius + 273.15
+        elif para == TemperatureScale.FAHRENHEIT:
+            return valor_celsius * 9.0 / 5.0 + 32.0
+        else:  # Celsius
+            return valor_celsius
+
+    def _obter_limites_escala(self) -> Tuple[float, float]:
+        """Obtém os limites físicos significativos para cada escala."""
+        if self.escala == TemperatureScale.KELVIN:
+            # Kelvin começa em 0 (zero absoluto)
+            return (0.0, 500.0)  # Exemplo de limite superior razoável
+        elif self.escala == TemperatureScale.FAHRENHEIT:
+            # Fahrenheit pode ir muito abaixo de zero
+            return (-500.0, 1000.0)  # Limites amplos mas razoáveis
+        else:  # Celsius
+            # Celsius tem limites amplos também
+            return (-300.0, 700.0)  # Limites amplos mas razoáveis
 
     def base_pos(self) -> Tuple[int, int]:
         return (self.x + self.w // 2, self.y + self.h + BASE_RAIO)
@@ -82,7 +136,20 @@ class TermometroRenderer:
     def _render_fill_level(self, surf: pygame.Surface, state: AppState) -> None:
         """Renderiza o nível de preenchimento do termômetro."""
         valor = state.valores()[self.escala]
-        nivel = (valor - state.temp_min) / (state.temp_max - state.temp_min)
+
+        # Converter os limites para a escala deste termômetro
+        temp_min_convertido = self.converter_para_escala(state.temp_min, TemperatureScale.CELSIUS, self.escala)
+        temp_max_convertido = self.converter_para_escala(state.temp_max, TemperatureScale.CELSIUS, self.escala)
+
+        # Calcular proporção correta dentro da faixa de temperatura atual
+        if temp_max_convertido - temp_min_convertido == 0:
+            nivel = 0
+        else:
+            nivel = (valor - temp_min_convertido) / (temp_max_convertido - temp_min_convertido)
+
+        # Garantir que o nível esteja entre 0 e 1
+        nivel = max(0.0, min(1.0, nivel))
+
         nivel_px = int(self.h * nivel)
         # Garantir que o retângulo de preenchimento não ultrapasse os limites do termômetro
         if nivel_px > self.h:
