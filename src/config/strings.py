@@ -1,6 +1,6 @@
 """Strings e textos da aplicação."""
 
-from ..temperature_types import TemperatureScale
+from src.temperature_types import TemperatureScale
 
 # Strings para internacionalização
 STRINGS = {

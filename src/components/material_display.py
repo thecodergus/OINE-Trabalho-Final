@@ -1,5 +1,8 @@
 import pygame
 import os
+
+from config.constants import FAIXA_LABEL_Y, PAINEL_W, PAINEL_X
+from utils.temperature_converter import converter
 from ..config.settings import (
     MATERIAL_IMG_Y,
     MATERIAL_IMG_DIM,
@@ -8,6 +11,7 @@ from ..config.settings import (
     FONTES,
 )
 from ..core.state import AppState
+from src.temperature_types import TemperatureScale
 
 
 class MaterialDisplay:
@@ -40,25 +44,31 @@ class MaterialDisplay:
             (0, 0, self.w, self.h),
             border_radius=8,
         )
-        pygame.draw.line(
-            image, CORES["material_borda"], (0, 0), (self.w, self.h), 2
-        )
-        pygame.draw.line(
-            image, CORES["material_borda"], (self.w, 0), (0, self.h), 2
-        )
+        pygame.draw.line(image, CORES["material_borda"], (0, 0), (self.w, self.h), 2)
+        pygame.draw.line(image, CORES["material_borda"], (self.w, 0), (0, self.h), 2)
         return image
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
         """Renderiza o display do material."""
-        self._render_label(surf)
+        self._render_label(surf, state)
         self._render_image(surf)
         self._render_border(surf)
 
-    def _render_label(self, surf: pygame.Surface) -> None:
-        """Renderiza o rótulo do material."""
+    def _render_label(self, surf: pygame.Surface, state: AppState) -> None:
+        # Converta os valores conforme a escala ativa
+        min_convertido = converter(
+            state.temp_min, TemperatureScale.CELSIUS, state.escala_ativa
+        )
+        max_convertido = converter(
+            state.temp_max, TemperatureScale.CELSIUS, state.escala_ativa
+        )
         fonte = pygame.font.SysFont(*FONTES["rotulo"])
-        txt = fonte.render(self.nome, True, CORES["texto"])
-        surf.blit(txt, (self.x + (self.w - txt.get_width()) // 2, MATERIAL_LABEL_Y))
+        txt = fonte.render(
+            f"({int(min_convertido)}, {int(max_convertido)}) {state.escala_ativa.symbol}",
+            True,
+            CORES["texto"],
+        )
+        surf.blit(txt, (PAINEL_X + (PAINEL_W - txt.get_width()) // 2, FAIXA_LABEL_Y))
 
     def _render_image(self, surf: pygame.Surface) -> None:
         """Renderiza a imagem do material."""

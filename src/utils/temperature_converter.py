@@ -1,5 +1,5 @@
 from typing import Dict
-from ..temperature_types import TemperatureScale
+from src.temperature_types import TemperatureScale
 
 
 def celsius_to_kelvin(c: float) -> float:
