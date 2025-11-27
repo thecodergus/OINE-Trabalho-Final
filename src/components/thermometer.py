@@ -18,19 +18,14 @@ class Termometro:
 
     def _criar_cache(self) -> None:
         if self._cache_surface is None or self._cache_rect != self.rect:
-            # Aumentar a altura da superfície para acomodar a base maior
-            self._cache_surface = pygame.Surface((self.w, self.h + BASE_RAIO * 2 + 10), pygame.SRCALPHA)
+            # Criar superfície apenas para o termômetro (sem a base)
+            self._cache_surface = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
             self._cache_rect = self.rect.copy()
             
             pygame.draw.rect(self._cache_surface, (240, 240, 240), 
                            (0, 0, self.w, self.h), border_radius=8)
             pygame.draw.rect(self._cache_surface, CORES["termometro_borda"], 
                            (0, 0, self.w, self.h), 2, border_radius=8)
-            
-            base_x = self.w // 2
-            base_y = self.h + BASE_RAIO + 5  # Ajustado para posicionar corretamente
-            pygame.draw.circle(self._cache_surface, CORES["indicador"], (base_x, base_y), BASE_RAIO)
-            pygame.draw.circle(self._cache_surface, CORES["texto"], (base_x, base_y), BASE_RAIO, 2)
 
     def valor_para_y(self, valor: float, temp_min: float, temp_max: float) -> int:
         ratio = (valor - temp_min) / (temp_max - temp_min)
@@ -48,7 +43,7 @@ class Termometro:
         return (x, y)
 
     def base_pos(self) -> Tuple[int, int]:
-        return (self.x + self.w // 2, self.y + self.h + BASE_RAIO + 5)
+        return (self.x + self.w // 2, self.y + self.h + BASE_RAIO)
 
     def handle_event(self, event: pygame.event.Event, state: AppState) -> Optional[AppState]:
         thumb_x, thumb_y = self.thumb_pos(state)
@@ -107,9 +102,11 @@ class Termometro:
     def render(self, surf: pygame.Surface, state: AppState) -> None:
         self._criar_cache()
         
+        # Desenhar o termômetro
         if self._cache_surface:
             surf.blit(self._cache_surface, (self.x, self.y))
         
+        # Desenhar o nível de preenchimento
         valor = state.valores()[self.escala]
         nivel = (valor - state.temp_min) / (state.temp_max - state.temp_min)
         nivel_px = int(self.h * nivel)
@@ -118,10 +115,18 @@ class Termometro:
         )
         pygame.draw.rect(surf, CORES["indicador"], rect_preenchido, border_radius=8)
         
+        # Desenhar o thumb (círculo móvel)
         thumb_x, thumb_y = self.thumb_pos(state)
         pygame.draw.circle(surf, CORES["indicador"], (thumb_x, thumb_y), THUMB_RAIO)
         pygame.draw.circle(surf, CORES["texto"], (thumb_x, thumb_y), THUMB_RAIO, 2)
         
+        # Desenhar a base (bolinha) separadamente, sobrepondo o início do termômetro
+        base_x = self.x + self.w // 2
+        base_y = self.y + self.h + BASE_RAIO - 5  # Posicionar no início do termômetro
+        pygame.draw.circle(surf, CORES["indicador"], (base_x, base_y), BASE_RAIO)
+        pygame.draw.circle(surf, CORES["texto"], (base_x, base_y), BASE_RAIO, 2)
+        
+        # Desenhar o texto com o valor
         fonte = pygame.font.SysFont(*FONTES["valor"])
         txt = fonte.render(f"{valor:.2f} {self.escala}", True, CORES["texto"])
         surf.blit(txt, (self.x + (self.w - txt.get_width()) // 2, self.y - 48))
