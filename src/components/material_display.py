@@ -73,16 +73,10 @@ class MaterialDisplay:
         self._render_border(surf)
 
     def _render_label(self, surf: pygame.Surface, state: AppState) -> None:
-        # Converta os valores conforme a escala ativa
-        min_convertido = converter(
-            state.temp_min, TemperatureScale.CELSIUS, state.escala_ativa
-        )
-        max_convertido = converter(
-            state.temp_max, TemperatureScale.CELSIUS, state.escala_ativa
-        )
+        # Mostrar o nome do material em vez do intervalo de temperatura
         fonte = get_font_by_name("rotulo")
         txt = fonte.render(
-            f"({int(min_convertido)}, {int(max_convertido)}) {state.escala_ativa.symbol}",
+            self.nome,
             True,
             CORES["texto"],
         )
