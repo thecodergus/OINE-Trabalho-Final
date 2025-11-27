@@ -6,23 +6,17 @@ STRINGS = {
     "titulo_janela": "Simulação de Temperatura",
     "botao_mais": "+",
     "botao_menos": "−",
-    "materiais": {
-        "agua": "Água",
-        "vidro": "Vidro",
-        "aluminio": "Alumínio"
-    },
-    "escalas": {
-        "kelvin": "K",
-        "celsius": "°C",
-        "fahrenheit": "°F"
-    }
+    "materiais": {"agua": "Água", "vidro": "Vidro", "aluminio": "Alumínio"},
+    "escalas": {"kelvin": "K", "celsius": "°C", "fahrenheit": "°F"},
 }
+
 
 def hex_to_rgb(h: str) -> Tuple[int, int, int]:
     h = h.lstrip("#")
     if len(h) != 6:
         raise ValueError(f"Formato hexadecimal inválido: '{h}'")
     return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+
 
 CORES = {
     "fundo": hex_to_rgb("#FFFFFF"),
@@ -54,18 +48,24 @@ TERMOMETRO_COUNT = 3
 THUMB_RAIO = 18
 BASE_RAIO = 25  # Aumentado de 22 para 25
 
+
 # Espaçamento dinâmico centralizado (com deslocamento para a direita)
 def calcular_termometro_xs() -> Tuple[int, int, int]:
     # Calcular margem esquerda aumentada (100 pixels a mais)
     margem_lateral_original = 159
-    margem_lateral = int(margem_lateral_original * 0.8) + 100  # 20% menor + 100 pixels
-    area_util = TELA_LARGURA - 2 * margem_lateral - 150  # Reduzir área útil para afastar do painel
-    espacamento = (area_util - TERMOMETRO_COUNT * TERMOMETRO_DIM[0]) // (TERMOMETRO_COUNT - 1)
+    margem_lateral = int(margem_lateral_original * 0.8) + 50  # 20% menor + 100 pixels
+    area_util = (
+        TELA_LARGURA - 2 * margem_lateral - 150
+    )  # Reduzir área útil para afastar do painel
+    espacamento = (area_util - TERMOMETRO_COUNT * TERMOMETRO_DIM[0]) // (
+        TERMOMETRO_COUNT - 1
+    )
     xs = [
         margem_lateral + i * (TERMOMETRO_DIM[0] + espacamento)
         for i in range(TERMOMETRO_COUNT)
     ]
     return (xs[0], xs[1], xs[2])
+
 
 TERMOMETRO_XS = calcular_termometro_xs()
 
@@ -82,15 +82,16 @@ MATERIAL_IMG_DIM = (120, 88)
 MATERIAL_IMG_Y = 549
 MATERIAL_LABEL_Y = MATERIAL_IMG_Y - 48
 
+
 # Calcular posições dos materiais centralizadas
 def calcular_material_xs() -> List[int]:
     # Calcular posições centralizadas
     espaco_total = TELA_LARGURA
-    espaco_entre = (espaco_total - (3 * MATERIAL_IMG_DIM[0])) // 4  # 4 espaços: antes, entre, entre, depois
-    return [
-        espaco_entre + i * (MATERIAL_IMG_DIM[0] + espaco_entre)
-        for i in range(3)
-    ]
+    espaco_entre = (
+        espaco_total - (3 * MATERIAL_IMG_DIM[0])
+    ) // 4  # 4 espaços: antes, entre, entre, depois
+    return [espaco_entre + i * (MATERIAL_IMG_DIM[0] + espaco_entre) for i in range(3)]
+
 
 MATERIAL_XS = calcular_material_xs()
 
