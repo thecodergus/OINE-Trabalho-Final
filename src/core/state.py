@@ -38,17 +38,17 @@ class AppState:
         return max(self.temp_min, min(self.temp_max, valor))
     
     def atinge_limite_maximo(self) -> bool:
-        """Verifica se algum dos valores atingiu o limite máximo absoluto."""
+        """Verifica se algum dos valores atingiu o limite máximo."""
         valores = self.valores()
-        # Limites absolutos: 0K é o zero absoluto, 1000°C é nosso limite superior arbitrário
-        return (valores[STRINGS["escalas"]["kelvin"]] >= 1000 or  # Limite superior arbitrário em Kelvin
-                valores[STRINGS["escalas"]["celsius"]] >= 726.85 or  # 1000K em Celsius
-                valores[STRINGS["escalas"]["fahrenheit"]] >= 1340.33)  # 1000K em Fahrenheit
+        # Verifica se qualquer escala atingiu seu limite máximo
+        return (valores[STRINGS["escalas"]["celsius"]] >= self.temp_max or
+                valores[STRINGS["escalas"]["kelvin"]] >= celsius_to_kelvin(self.temp_max) or
+                valores[STRINGS["escalas"]["fahrenheit"]] >= celsius_to_fahrenheit(self.temp_max))
     
     def atinge_limite_minimo(self) -> bool:
-        """Verifica se algum dos valores atingiu o limite mínimo absoluto."""
+        """Verifica se algum dos valores atingiu o limite mínimo."""
         valores = self.valores()
-        # Zero absoluto
-        return (valores[STRINGS["escalas"]["kelvin"]] <= 0 or
-                valores[STRINGS["escalas"]["celsius"]] <= -273.15 or
-                valores[STRINGS["escalas"]["fahrenheit"]] <= -459.67)
+        # Verifica se qualquer escala atingiu seu limite mínimo
+        return (valores[STRINGS["escalas"]["celsius"]] <= self.temp_min or
+                valores[STRINGS["escalas"]["kelvin"]] <= celsius_to_kelvin(self.temp_min) or
+                valores[STRINGS["escalas"]["fahrenheit"]] <= celsius_to_fahrenheit(self.temp_min))
