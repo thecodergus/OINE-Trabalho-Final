@@ -9,15 +9,18 @@ from ..config.settings import (
     PAINEL_W,
     PAINEL_H,
     CORES,
-    FONTES,
     BOTAO_RAIO,
     BOTAO_Y,
     BOTAO_MAIS_X,
     BOTAO_MENOS_X,
     FAIXA_LABEL_Y,
+    TEMP_MIN_LIMITE,
+    TEMP_MAX_LIMITE,
 )
 from ..core.state import AppState
 from ..temperature_types import TemperatureScale
+from ..utils.font_cache import get_font_by_name
+from ..utils.render_utils import draw_circle_with_border
 
 
 class PainelControle:
@@ -70,34 +73,29 @@ class PainelControle:
         return state
 
     def _handle_plus_button(self, state: AppState) -> AppState:
-        # Calcular a distância dos valores atuais em relação à base (em Celsius)
-        distancia_min = state.temp_min - BASE_MIN
-        distancia_max = state.temp_max - BASE_MAX
+        # Expandir o intervalo de temperatura multiplicando por 2
+        range_center = (state.temp_min + state.temp_max) / 2
+        range_size = state.temp_max - state.temp_min
 
-        # Multiplicar as distâncias por 2
-        nova_distancia_min = distancia_min * 2
-        nova_distancia_max = distancia_max * 2
-
-        # Calcular os novos valores (em Celsius)
-        novo_min = BASE_MIN + nova_distancia_min
-        novo_max = BASE_MAX + nova_distancia_max
+        # Dobrar o tamanho do intervalo
+        new_range_size = range_size * 2
+        new_min = range_center - new_range_size / 2
+        new_max = range_center + new_range_size / 2
 
         # Aplicar limites
-        novo_min = max(novo_min, -100.0)
-        novo_max = max(novo_max, 100.0)
+        new_min = max(new_min, TEMP_MIN_LIMITE)
+        new_max = min(new_max, TEMP_MAX_LIMITE)
 
-        # Atualizar também o valor ativo (aumenta proporcionalmente)
-        centro_atual = (state.temp_min + state.temp_max) / 2
-        centro_novo = (novo_min + novo_max) / 2
-        distancia_centro = state.valor_ativo - centro_atual
-        nova_distancia_centro = distancia_centro * 2
-        novo_valor = centro_novo + nova_distancia_centro
-        # Garantir que o valor esteja dentro dos novos limites
-        novo_valor = max(novo_min, min(novo_max, novo_valor))
+        # Ajustar o valor ativo proporcionalmente
+        if range_size > 0:
+            position_ratio = (state.valor_ativo - state.temp_min) / range_size
+            novo_valor = new_min + position_ratio * (new_max - new_min)
+        else:
+            novo_valor = state.valor_ativo
 
         return AppState(
-            temp_min=novo_min,
-            temp_max=novo_max,
+            temp_min=new_min,
+            temp_max=new_max,
             escala_ativa=state.escala_ativa,
             valor_ativo=novo_valor,
             arrastando=state.arrastando,
@@ -106,34 +104,29 @@ class PainelControle:
         )
 
     def _handle_minus_button(self, state: AppState) -> AppState:
-        # Calcular a distância dos valores atuais em relação à base (em Celsius)
-        distancia_min = state.temp_min - BASE_MIN
-        distancia_max = state.temp_max - BASE_MAX
+        # Contrair o intervalo de temperatura dividindo por 2
+        range_center = (state.temp_min + state.temp_max) / 2
+        range_size = state.temp_max - state.temp_min
 
-        # Dividir as distâncias por 2
-        nova_distancia_min = distancia_min / 2
-        nova_distancia_max = distancia_max / 2
-
-        # Calcular os novos valores (em Celsius)
-        novo_min = BASE_MIN + nova_distancia_min
-        novo_max = BASE_MAX + nova_distancia_max
+        # Dividir o tamanho do intervalo por 2
+        new_range_size = range_size / 2
+        new_min = range_center - new_range_size / 2
+        new_max = range_center + new_range_size / 2
 
         # Aplicar limites
-        novo_min = max(novo_min, -100.0)
-        novo_max = max(novo_max, 100.0)
+        new_min = max(new_min, TEMP_MIN_LIMITE)
+        new_max = min(new_max, TEMP_MAX_LIMITE)
 
-        # Atualizar também o valor ativo (diminui proporcionalmente)
-        centro_atual = (state.temp_min + state.temp_max) / 2
-        centro_novo = (novo_min + novo_max) / 2
-        distancia_centro = state.valor_ativo - centro_atual
-        nova_distancia_centro = distancia_centro / 2
-        novo_valor = centro_novo + nova_distancia_centro
-        # Garantir que o valor esteja dentro dos novos limites
-        novo_valor = max(novo_min, min(novo_max, novo_valor))
+        # Ajustar o valor ativo proporcionalmente
+        if range_size > 0:
+            position_ratio = (state.valor_ativo - state.temp_min) / range_size
+            novo_valor = new_min + position_ratio * (new_max - new_min)
+        else:
+            novo_valor = state.valor_ativo
 
         return AppState(
-            temp_min=novo_min,
-            temp_max=novo_max,
+            temp_min=new_min,
+            temp_max=new_max,
             escala_ativa=state.escala_ativa,
             valor_ativo=novo_valor,
             arrastando=state.arrastando,
@@ -152,7 +145,7 @@ class PainelControle:
         min_celsius = state.temp_min
         max_celsius = state.temp_max
 
-        fonte = pygame.font.SysFont(*FONTES["rotulo"])
+        fonte = get_font_by_name("rotulo")
         txt = fonte.render(
             f"({int(min_celsius)}, {int(max_celsius)}) °C",
             True,
@@ -174,9 +167,10 @@ class PainelControle:
         )
 
         # Renderizar botão +
-        pygame.draw.circle(surf, cor_botao_mais, self.botao_mais.center, BOTAO_RAIO)
-        pygame.draw.circle(surf, CORES["texto"], self.botao_mais.center, BOTAO_RAIO, 2)
-        fonte_b = pygame.font.SysFont(*FONTES["titulo"])
+        draw_circle_with_border(
+            surf, self.botao_mais.center, BOTAO_RAIO, cor_botao_mais, CORES["texto"], 2
+        )
+        fonte_b = get_font_by_name("titulo")
         txt_mais = fonte_b.render("+", True, CORES["texto"])
         surf.blit(
             txt_mais,
@@ -187,8 +181,9 @@ class PainelControle:
         )
 
         # Renderizar botão -
-        pygame.draw.circle(surf, cor_botao_menos, self.botao_menos.center, BOTAO_RAIO)
-        pygame.draw.circle(surf, CORES["texto"], self.botao_menos.center, BOTAO_RAIO, 2)
+        draw_circle_with_border(
+            surf, self.botao_menos.center, BOTAO_RAIO, cor_botao_menos, CORES["texto"], 2
+        )
         txt_menos = fonte_b.render("−", True, CORES["texto"])
         surf.blit(
             txt_menos,

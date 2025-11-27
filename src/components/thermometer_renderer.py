@@ -6,10 +6,13 @@ from ..config.settings import (
     CORES,
     THUMB_RAIO,
     BASE_RAIO,
-    FONTES,
+    BORDA_ARREDONDADA,
+    POSICAO_TEXTO_TERMOMETRO_Y,
 )
 from ..core.state import AppState
 from ..temperature_types import TemperatureScale
+from ..utils.font_cache import get_font_by_name
+from ..utils.render_utils import draw_circle_with_border, draw_rounded_rect_with_border
 
 
 class TermometroRenderer:
@@ -28,18 +31,20 @@ class TermometroRenderer:
             self._cache_surface = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
             self._cache_rect = self.rect.copy()
 
+            # Desenhar o fundo do termômetro
             pygame.draw.rect(
                 self._cache_surface,
                 (240, 240, 240),
                 (0, 0, self.w, self.h),
-                border_radius=8,
+                border_radius=BORDA_ARREDONDADA,
             )
+            # Desenhar a borda do termômetro
             pygame.draw.rect(
                 self._cache_surface,
                 CORES["termometro_borda"],
                 (0, 0, self.w, self.h),
                 2,
-                border_radius=8,
+                border_radius=BORDA_ARREDONDADA,
             )
 
     def valor_para_y(self, valor: float, temp_min: float, temp_max: float) -> int:
@@ -85,23 +90,25 @@ class TermometroRenderer:
         rect_preenchido = pygame.Rect(
             self.x, self.y + self.h - nivel_px, self.w, nivel_px
         )
-        pygame.draw.rect(surf, CORES["indicador"], rect_preenchido, border_radius=8)
+        pygame.draw.rect(surf, CORES["indicador"], rect_preenchido, border_radius=BORDA_ARREDONDADA)
 
     def _render_thumb(self, surf: pygame.Surface, state: AppState) -> None:
         """Renderiza o thumb (círculo móvel)."""
         thumb_x, thumb_y = self.thumb_pos(state)
-        pygame.draw.circle(surf, CORES["indicador"], (thumb_x, thumb_y), THUMB_RAIO)
-        pygame.draw.circle(surf, CORES["texto"], (thumb_x, thumb_y), THUMB_RAIO, 2)
+        draw_circle_with_border(
+            surf, (thumb_x, thumb_y), THUMB_RAIO, CORES["indicador"], CORES["texto"], 2
+        )
 
     def _render_base(self, surf: pygame.Surface) -> None:
         """Renderiza a base (bolinha) do termômetro."""
         base_x, base_y = self.base_pos()
-        pygame.draw.circle(surf, CORES["indicador"], (base_x, base_y), BASE_RAIO)
-        pygame.draw.circle(surf, CORES["texto"], (base_x, base_y), BASE_RAIO, 2)
+        draw_circle_with_border(
+            surf, (base_x, base_y), BASE_RAIO, CORES["indicador"], CORES["texto"], 2
+        )
 
     def _render_value_text(self, surf: pygame.Surface, state: AppState) -> None:
         """Renderiza o texto com o valor da temperatura."""
         valor = state.valores()[self.escala]
-        fonte = pygame.font.SysFont(*FONTES["valor"])
+        fonte = get_font_by_name("valor")
         txt = fonte.render(f"{valor:.2f} {self.escala.symbol}", True, CORES["texto"])
-        surf.blit(txt, (self.x + (self.w - txt.get_width()) // 2, self.y - 48))
+        surf.blit(txt, (self.x + (self.w - txt.get_width()) // 2, self.y - POSICAO_TEXTO_TERMOMETRO_Y))

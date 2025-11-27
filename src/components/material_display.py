@@ -1,17 +1,17 @@
 import pygame
 import os
 
-from config.constants import FAIXA_LABEL_Y, PAINEL_W, PAINEL_X
-from utils.temperature_converter import converter
+from ..config.constants import MATERIAL_LABEL_Y, BORDA_ARREDONDADA
 from ..config.settings import (
     MATERIAL_IMG_Y,
     MATERIAL_IMG_DIM,
     CORES,
-    MATERIAL_LABEL_Y,
-    FONTES,
 )
 from ..core.state import AppState
 from src.temperature_types import TemperatureScale
+from ..utils.temperature_converter import converter
+from ..utils.font_cache import get_font_by_name
+from ..utils.render_utils import draw_rounded_rect_with_border
 
 
 class MaterialDisplay:
@@ -38,11 +38,13 @@ class MaterialDisplay:
         """Cria uma imagem placeholder quando a imagem original não pode ser carregada."""
         image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
         image.fill((0, 0, 0, 0))
-        pygame.draw.rect(
+        draw_rounded_rect_with_border(
             image,
+            pygame.Rect(0, 0, self.w, self.h),
             CORES["material_fundo"],
-            (0, 0, self.w, self.h),
-            border_radius=8,
+            CORES["material_fundo"],  # Same color for border since we want solid fill
+            0,  # No border
+            BORDA_ARREDONDADA,  # Border radius
         )
         pygame.draw.line(image, CORES["material_borda"], (0, 0), (self.w, self.h), 2)
         pygame.draw.line(image, CORES["material_borda"], (self.w, 0), (0, self.h), 2)
@@ -62,13 +64,14 @@ class MaterialDisplay:
         max_convertido = converter(
             state.temp_max, TemperatureScale.CELSIUS, state.escala_ativa
         )
-        fonte = pygame.font.SysFont(*FONTES["rotulo"])
+        fonte = get_font_by_name("rotulo")
         txt = fonte.render(
             f"({int(min_convertido)}, {int(max_convertido)}) {state.escala_ativa.symbol}",
             True,
             CORES["texto"],
         )
-        surf.blit(txt, (PAINEL_X + (PAINEL_W - txt.get_width()) // 2, FAIXA_LABEL_Y))
+        # Position label centered below each material image
+        surf.blit(txt, (self.x + (self.w - txt.get_width()) // 2, MATERIAL_LABEL_Y))
 
     def _render_image(self, surf: pygame.Surface) -> None:
         """Renderiza a imagem do material."""
@@ -76,4 +79,6 @@ class MaterialDisplay:
 
     def _render_border(self, surf: pygame.Surface) -> None:
         """Renderiza a borda ao redor da imagem do material."""
-        pygame.draw.rect(surf, CORES["material_borda"], self.rect, 2, border_radius=8)
+        draw_rounded_rect_with_border(
+            surf, self.rect, (0, 0, 0, 0), CORES["material_borda"], 2, 8
+        )
