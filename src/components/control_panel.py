@@ -20,7 +20,7 @@ class PainelControle:
             BOTAO_RAIO * 2,
             BOTAO_RAIO * 2,
         )
-        self.incremento = 10.0
+        self.fator_escala = 2.0  # Fator de multiplicação/divisão
 
     def handle_event(self, event: pygame.event.Event, state: AppState) -> AppState:
         if state.arrastando is not None:
@@ -30,13 +30,16 @@ class PainelControle:
             
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.botao_mais.collidepoint(event.pos):
-                # Aumentar a proporção (aumentar o limite máximo e manter o mínimo)
-                novo_max = state.temp_max + self.incremento
-                # Ajustar o valor ativo se necessário
-                novo_valor = min(state.valor_ativo, novo_max)
+                # Aumentar a proporção (multiplicar ambos os valores)
+                novo_min = state.temp_min * self.fator_escala
+                novo_max = state.temp_max * self.fator_escala
+                
+                # Ajustar o valor ativo proporcionalmente
+                proporcao = (state.valor_ativo - state.temp_min) / (state.temp_max - state.temp_min)
+                novo_valor = novo_min + proporcao * (novo_max - novo_min)
                 
                 novo_state = AppState(
-                    temp_min=state.temp_min,
+                    temp_min=novo_min,
                     temp_max=novo_max,
                     escala_ativa=state.escala_ativa,
                     valor_ativo=novo_valor,
@@ -45,14 +48,17 @@ class PainelControle:
                     botao_menos_pressionado=state.botao_menos_pressionado
                 )
             if self.botao_menos.collidepoint(event.pos):
-                # Diminuir a proporção (diminuir o limite mínimo e manter o máximo)
-                novo_min = state.temp_min - self.incremento
-                # Ajustar o valor ativo se necessário
-                novo_valor = max(state.valor_ativo, novo_min)
+                # Diminuir a proporção (dividir ambos os valores)
+                novo_min = state.temp_min / self.fator_escala
+                novo_max = state.temp_max / self.fator_escala
+                
+                # Ajustar o valor ativo proporcionalmente
+                proporcao = (state.valor_ativo - state.temp_min) / (state.temp_max - state.temp_min)
+                novo_valor = novo_min + proporcao * (novo_max - novo_min)
                 
                 novo_state = AppState(
                     temp_min=novo_min,
-                    temp_max=state.temp_max,
+                    temp_max=novo_max,
                     escala_ativa=state.escala_ativa,
                     valor_ativo=novo_valor,
                     arrastando=state.arrastando,
