@@ -47,7 +47,9 @@ class PainelControle:
 
         return state
 
-    def _handle_mouse_down(self, event: pygame.event.Event, state: AppState) -> AppState:
+    def _handle_mouse_down(
+        self, event: pygame.event.Event, state: AppState
+    ) -> AppState:
         if self.botao_mais.collidepoint(event.pos):
             return self._handle_plus_button(state)
         elif self.botao_menos.collidepoint(event.pos):

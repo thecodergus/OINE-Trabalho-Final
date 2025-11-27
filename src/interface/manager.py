@@ -32,12 +32,13 @@ class InterfaceManager:
         ]
 
     def handle_event(self, event: pygame.event.Event, state: AppState) -> AppState:
+        novo_state = state
         for termo in self.termometros:
-            novo = termo.handle_event(event, state)
-            if novo is not None and novo != state:
-                return novo
-        # Agora corretamente retorna o estado do painel de controle
-        return self.painel_controle.handle_event(event, state)
+            resultado = termo.handle_event(event, novo_state)
+            if resultado is not None and resultado != novo_state:
+                novo_state = resultado
+        # Sempre passa o evento para o painel de controle, com o estado atualizado
+        return self.painel_controle.handle_event(event, novo_state)
 
     def render(self, surface: pygame.Surface, state: AppState) -> None:
         for termo in self.termometros:
