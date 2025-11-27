@@ -66,7 +66,6 @@ class Termometro:
         self, event: pygame.event.Event, state: AppState
     ) -> Optional[AppState]:
         thumb_x, thumb_y = self.thumb_pos(state)
-        base_x, base_y = self.base_pos()
         mouse_x, mouse_y = getattr(event, "pos", (None, None))
         if event.type == pygame.MOUSEBUTTONDOWN:
             # Verificar clique no thumb (círculo móvel)
@@ -75,22 +74,6 @@ class Termometro:
                 and mouse_y is not None
                 and (thumb_x - THUMB_RAIO) <= mouse_x <= (thumb_x + THUMB_RAIO)
                 and (thumb_y - THUMB_RAIO) <= mouse_y <= (thumb_y + THUMB_RAIO)
-            ):
-                return AppState(
-                    temp_min=state.temp_min,
-                    temp_max=state.temp_max,
-                    escala_ativa=self.escala,
-                    valor_ativo=state.valor_ativo,
-                    arrastando=self.escala.value,
-                    botao_mais_pressionado=state.botao_mais_pressionado,
-                    botao_menos_pressionado=state.botao_menos_pressionado,
-                )
-            # Verificar clique na base (bolinha fixa na parte inferior)
-            elif (
-                mouse_x is not None
-                and mouse_y is not None
-                and (base_x - BASE_RAIO) <= mouse_x <= (base_x + BASE_RAIO)
-                and (base_y - BASE_RAIO) <= mouse_y <= (base_y + BASE_RAIO)
             ):
                 return AppState(
                     temp_min=state.temp_min,
