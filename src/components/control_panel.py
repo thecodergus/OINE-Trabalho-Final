@@ -70,7 +70,7 @@ class PainelControle:
         return state
 
     def _handle_plus_button(self, state: AppState) -> AppState:
-        # Calcular a distância dos valores atuais em relação à base
+        # Calcular a distância dos valores atuais em relação à base (em Celsius)
         distancia_min = state.temp_min - BASE_MIN
         distancia_max = state.temp_max - BASE_MAX
 
@@ -78,7 +78,7 @@ class PainelControle:
         nova_distancia_min = distancia_min * 2
         nova_distancia_max = distancia_max * 2
 
-        # Calcular os novos valores
+        # Calcular os novos valores (em Celsius)
         novo_min = BASE_MIN + nova_distancia_min
         novo_max = BASE_MAX + nova_distancia_max
 
@@ -106,7 +106,7 @@ class PainelControle:
         )
 
     def _handle_minus_button(self, state: AppState) -> AppState:
-        # Calcular a distância dos valores atuais em relação à base
+        # Calcular a distância dos valores atuais em relação à base (em Celsius)
         distancia_min = state.temp_min - BASE_MIN
         distancia_max = state.temp_max - BASE_MAX
 
@@ -114,7 +114,7 @@ class PainelControle:
         nova_distancia_min = distancia_min / 2
         nova_distancia_max = distancia_max / 2
 
-        # Calcular os novos valores
+        # Calcular os novos valores (em Celsius)
         novo_min = BASE_MIN + nova_distancia_min
         novo_max = BASE_MAX + nova_distancia_max
 
@@ -147,18 +147,14 @@ class PainelControle:
         self._render_buttons(surf, state)
 
     def _render_label(self, surf: pygame.Surface, state: AppState) -> None:
-        """Renderiza a label com os valores de temperatura."""
-        escala_ativa = state.escala_ativa
-        min_convertido = converter(
-            state.temp_min, TemperatureScale.CELSIUS, escala_ativa
-        )
-        max_convertido = converter(
-            state.temp_max, TemperatureScale.CELSIUS, escala_ativa
-        )
+        """Renderiza a label com os valores de temperatura em Celsius."""
+        # Sempre mostrar em Celsius, independentemente da escala ativa
+        min_celsius = state.temp_min
+        max_celsius = state.temp_max
 
         fonte = pygame.font.SysFont(*FONTES["rotulo"])
         txt = fonte.render(
-            f"({int(min_convertido)}, {int(max_convertido)}) {escala_ativa.symbol}",
+            f"({int(min_celsius)}, {int(max_celsius)}) °C",
             True,
             CORES["texto"],
         )
