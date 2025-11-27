@@ -1,11 +1,28 @@
 import pygame
 from dataclasses import dataclass, replace
-from typing import Tuple, Optional, Literal, Dict
+from typing import Tuple, Optional, Dict, List
+import os
 
 # =========================
 # 1. Utilitários e Constantes
 # =========================
 
+# Strings para internacionalização
+STRINGS = {
+    "titulo_janela": "Simulação de Temperatura",
+    "botao_mais": "+",
+    "botao_menos": "−",
+    "materiais": {
+        "agua": "Água",
+        "vidro": "Vidro",
+        "aluminio": "Alumínio"
+    },
+    "escalas": {
+        "kelvin": "K",
+        "celsius": "°C",
+        "fahrenheit": "°F"
+    }
+}
 
 def hex_to_rgb(h: str) -> Tuple[int, int, int]:
     h = h.lstrip("#")
@@ -25,6 +42,7 @@ CORES = {
     "termometro_borda": (80, 80, 80),
     "material_borda": (120, 120, 120),
     "material_fundo": (200, 200, 200),
+    "botao_clique": hex_to_rgb("#CCCCCC"),  # Cor para feedback de clique
 }
 
 # Fontes dobradas
@@ -40,7 +58,7 @@ TELA_LARGURA, TELA_ALTURA = 1024, 768
 TERMOMETRO_DIM = (32, 293)
 TERMOMETRO_Y = 111
 TERMOMETRO_COUNT = 3
-TERMOMETRO_ESCALAS = ["K", "°C", "°F"]
+TERMOMETRO_ESCALAS = [STRINGS["escalas"]["kelvin"], STRINGS["escalas"]["celsius"], STRINGS["escalas"]["fahrenheit"]]
 THUMB_RAIO = 18
 BASE_RAIO = 22
 
@@ -76,9 +94,9 @@ MATERIAL_IMG_Y = 549
 MATERIAL_LABEL_Y = MATERIAL_IMG_Y - 48  # Ajustado para fonte maior
 MATERIAL_XS = [159, 444, 717]
 MATERIAIS = [
-    ("Água", "src/assets/imagem_generica.jpg"),
-    ("Vidro", "src/assets/imagem_generica.jpg"),
-    ("Alumínio", "src/assets/imagem_generica.jpg"),
+    (STRINGS["materiais"]["agua"], "src/assets/imagem_generica.jpg"),
+    (STRINGS["materiais"]["vidro"], "src/assets/imagem_generica.jpg"),
+    (STRINGS["materiais"]["aluminio"], "src/assets/imagem_generica.jpg"),
 ]
 
 # =========================
@@ -105,17 +123,17 @@ def fahrenheit_to_celsius(f: float) -> float:
 def converter(valor: float, de: str, para: str) -> float:
     if de == para:
         return valor
-    if de == "°C":
-        if para == "K":
+    if de == STRINGS["escalas"]["celsius"]:
+        if para == STRINGS["escalas"]["kelvin"]:
             return celsius_to_kelvin(valor)
-        if para == "°F":
+        if para == STRINGS["escalas"]["fahrenheit"]:
             return celsius_to_fahrenheit(valor)
-    if de == "K":
+    if de == STRINGS["escalas"]["kelvin"]:
         c = kelvin_to_celsius(valor)
-        return c if para == "°C" else celsius_to_fahrenheit(c)
-    if de == "°F":
+        return c if para == STRINGS["escalas"]["celsius"] else celsius_to_fahrenheit(c)
+    if de == STRINGS["escalas"]["fahrenheit"]:
         c = fahrenheit_to_celsius(valor)
-        return c if para == "°C" else celsius_to_kelvin(c)
+        return c if para == STRINGS["escalas"]["celsius"] else celsius_to_kelvin(c)
     raise ValueError(f"Conversão inválida: {de} -> {para}")
 
 
@@ -128,37 +146,33 @@ def converter(valor: float, de: str, para: str) -> float:
 class AppState:
     temp_min: float = -50.0
     temp_max: float = 300.0
-    escala_ativa: str = "°C"  # "K", "°C", "°F"
+    escala_ativa: str = STRINGS["escalas"]["celsius"]  # "K", "°C", "°F"
     valor_ativo: float = 20.0
     arrastando: Optional[str] = None  # "K", "°C", "°F" ou None
+    # Estados para feedback visual
+    botao_mais_pressionado: bool = False
+    botao_menos_pressionado: bool = False
 
     def valores(self) -> Dict[str, float]:
-        match self.escala_ativa:
-            case "°C":
-                c = self.valor_ativo
-                return {
-                    "°C": c,
-                    "K": celsius_to_kelvin(c),
-                    "°F": celsius_to_fahrenheit(c),
-                }
-            case "K":
-                k = self.valor_ativo
-                c = kelvin_to_celsius(k)
-                return {
-                    "K": k,
-                    "°C": c,
-                    "°F": celsius_to_fahrenheit(c),
-                }
-            case "°F":
-                f = self.valor_ativo
-                c = fahrenheit_to_celsius(f)
-                return {
-                    "°F": f,
-                    "°C": c,
-                    "K": celsius_to_kelvin(c),
-                }
-            case _:
-                raise ValueError("Escala ativa inválida")
+        """Calcula os valores equivalentes nas três escalas."""
+        if self.escala_ativa == STRINGS["escalas"]["celsius"]:
+            return self._valores_desde_celsius(self.valor_ativo)
+        elif self.escala_ativa == STRINGS["escalas"]["kelvin"]:
+            celsius = kelvin_to_celsius(self.valor_ativo)
+            return self._valores_desde_celsius(celsius)
+        elif self.escala_ativa == STRINGS["escalas"]["fahrenheit"]:
+            celsius = fahrenheit_to_celsius(self.valor_ativo)
+            return self._valores_desde_celsius(celsius)
+        else:
+            raise ValueError("Escala ativa inválida")
+
+    def _valores_desde_celsius(self, celsius: float) -> Dict[str, float]:
+        """Calcula os valores equivalentes a partir de Celsius."""
+        return {
+            STRINGS["escalas"]["celsius"]: celsius,
+            STRINGS["escalas"]["kelvin"]: celsius_to_kelvin(celsius),
+            STRINGS["escalas"]["fahrenheit"]: celsius_to_fahrenheit(celsius),
+        }
 
     def clamp_valor(self, valor: float) -> float:
         return max(self.temp_min, min(self.temp_max, valor))
@@ -180,6 +194,30 @@ class Termometro:
         self.w, self.h = TERMOMETRO_DIM
         self.escala = escala
         self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
+        # Cache para elementos estáticos
+        self._cache_surface: Optional[pygame.Surface] = None
+        self._cache_rect: Optional[pygame.Rect] = None
+
+    def _criar_cache(self) -> None:
+        """Cria uma superfície cacheada com os elementos estáticos do termômetro."""
+        if self._cache_surface is None or self._cache_rect != self.rect:
+            self._cache_surface = pygame.Surface((self.w, self.h + BASE_RAIO * 2), pygame.SRCALPHA)
+            self._cache_rect = self.rect.copy()
+            
+            # Desenha o corpo do termômetro
+            pygame.draw.rect(self._cache_surface, (240, 240, 240), 
+                           (0, 0, self.w, self.h), border_radius=8)
+            pygame.draw.rect(self._cache_surface, CORES["termometro_borda"], 
+                           (0, 0, self.w, self.h), 2, border_radius=8)
+            
+            # Desenha o círculo da base (vermelho)
+            base_x = self.w // 2
+            base_y = self.h + BASE_RAIO
+            pygame.draw.circle(self._cache_surface, CORES["indicador"], (base_x, base_y), BASE_RAIO)
+            pygame.draw.circle(self._cache_surface, CORES["texto"], (base_x, base_y), BASE_RAIO, 2)
+            
+            # Desenha o thumb (bolinha vermelha) na posição inicial (não será usado no cache final)
+            # Mas reservamos espaço para ele
 
     def valor_para_y(self, valor: float, temp_min: float, temp_max: float) -> int:
         ratio = (valor - temp_min) / (temp_max - temp_min)
@@ -229,10 +267,14 @@ class Termometro:
         return None
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
-        # Corpo do termômetro
-        pygame.draw.rect(surf, (240, 240, 240), self.rect, border_radius=8)
-        pygame.draw.rect(surf, CORES["termometro_borda"], self.rect, 2, border_radius=8)
-        # Nível preenchido
+        # Cria ou atualiza o cache se necessário
+        self._criar_cache()
+        
+        # Desenha o cache (elementos estáticos)
+        if self._cache_surface:
+            surf.blit(self._cache_surface, (self.x, self.y))
+        
+        # Desenha o nível preenchido (dinâmico)
         valor = state.valores()[self.escala]
         nivel = (valor - state.temp_min) / (state.temp_max - state.temp_min)
         nivel_px = int(self.h * nivel)
@@ -240,14 +282,12 @@ class Termometro:
             self.x, self.y + self.h - nivel_px, self.w, nivel_px
         )
         pygame.draw.rect(surf, CORES["indicador"], rect_preenchido, border_radius=8)
-        # Círculo da base (vermelho)
-        base_x, base_y = self.base_pos()
-        pygame.draw.circle(surf, CORES["indicador"], (base_x, base_y), BASE_RAIO)
-        pygame.draw.circle(surf, CORES["texto"], (base_x, base_y), BASE_RAIO, 2)
-        # Thumb (bolinha vermelha)
+        
+        # Redesenha o thumb (bolinha vermelha) na nova posição
         thumb_x, thumb_y = self.thumb_pos(state)
         pygame.draw.circle(surf, CORES["indicador"], (thumb_x, thumb_y), THUMB_RAIO)
         pygame.draw.circle(surf, CORES["texto"], (thumb_x, thumb_y), THUMB_RAIO, 2)
+        
         # Label acima
         fonte = pygame.font.SysFont(*FONTES["valor"])
         txt = fonte.render(f"{valor:.2f} {self.escala}", True, CORES["texto"])
@@ -283,18 +323,27 @@ class PainelControle:
     def handle_event(self, event: pygame.event.Event, state: AppState) -> AppState:
         if state.arrastando is not None:
             return state
+            
+        novo_state = state
+            
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.botao_mais.collidepoint(event.pos):
                 novo_max = state.temp_max + 10
                 if novo_max - state.temp_min >= self.min_intervalo:
                     novo_valor = min(state.valor_ativo, novo_max)
-                    return replace(state, temp_max=novo_max, valor_ativo=novo_valor)
+                    novo_state = replace(state, temp_max=novo_max, valor_ativo=novo_valor, botao_mais_pressionado=True)
             if self.botao_menos.collidepoint(event.pos):
                 novo_min = state.temp_min - 10
                 if state.temp_max - novo_min >= self.min_intervalo:
                     novo_valor = max(state.valor_ativo, novo_min)
-                    return replace(state, temp_min=novo_min, valor_ativo=novo_valor)
-        return state
+                    novo_state = replace(state, temp_min=novo_min, valor_ativo=novo_valor, botao_menos_pressionado=True)
+                    
+        elif event.type == pygame.MOUSEBUTTONUP:
+            # Resetar estados de clique
+            if state.botao_mais_pressionado or state.botao_menos_pressionado:
+                novo_state = replace(state, botao_mais_pressionado=False, botao_menos_pressionado=False)
+                
+        return novo_state
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
         pygame.draw.rect(
@@ -315,13 +364,18 @@ class PainelControle:
             f"({int(state.temp_min)}, {int(state.temp_max)}) ºC", True, CORES["texto"]
         )
         surf.blit(txt, (PAINEL_X + (PAINEL_W - txt.get_width()) // 2, FAIXA_LABEL_Y))
+        
+        # Determinar cores dos botões com base no estado
+        cor_botao_mais = CORES["botao_clique"] if state.botao_mais_pressionado else CORES["botao_mais"]
+        cor_botao_menos = CORES["botao_clique"] if state.botao_menos_pressionado else CORES["botao_menos"]
+        
         # Botão +
         pygame.draw.circle(
-            surf, CORES["botao_mais"], self.botao_mais.center, BOTAO_RAIO
+            surf, cor_botao_mais, self.botao_mais.center, BOTAO_RAIO
         )
         pygame.draw.circle(surf, CORES["texto"], self.botao_mais.center, BOTAO_RAIO, 2)
         fonte_b = pygame.font.SysFont(*FONTES["titulo"])
-        txt_mais = fonte_b.render("+", True, CORES["texto"])
+        txt_mais = fonte_b.render(STRINGS["botao_mais"], True, CORES["texto"])
         surf.blit(
             txt_mais,
             (
@@ -331,10 +385,10 @@ class PainelControle:
         )
         # Botão -
         pygame.draw.circle(
-            surf, CORES["botao_menos"], self.botao_menos.center, BOTAO_RAIO
+            surf, cor_botao_menos, self.botao_menos.center, BOTAO_RAIO
         )
         pygame.draw.circle(surf, CORES["texto"], self.botao_menos.center, BOTAO_RAIO, 2)
-        txt_menos = fonte_b.render("−", True, CORES["texto"])
+        txt_menos = fonte_b.render(STRINGS["botao_menos"], True, CORES["texto"])
         surf.blit(
             txt_menos,
             (
@@ -361,9 +415,12 @@ class MaterialDisplay:
         self.nome = nome
         self.rect = pygame.Rect(self.x, self.y, self.w, self.h)
         try:
+            if not os.path.exists(img_path):
+                raise FileNotFoundError(f"Arquivo não encontrado: {img_path}")
             self.image = pygame.image.load(img_path).convert_alpha()
             self.image = pygame.transform.scale(self.image, (self.w, self.h))
-        except Exception:
+        except (pygame.error, FileNotFoundError) as e:
+            print(f"Erro ao carregar imagem {img_path}: {e}")
             self.image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
             self.image.fill((0, 0, 0, 0))
             pygame.draw.rect(
@@ -399,9 +456,9 @@ class InterfaceManager:
 
     def __init__(self) -> None:
         self.termometros = [
-            Termometro(TERMOMETRO_XS[0], "K"),
-            Termometro(TERMOMETRO_XS[1], "°C"),
-            Termometro(TERMOMETRO_XS[2], "°F"),
+            Termometro(TERMOMETRO_XS[0], STRINGS["escalas"]["kelvin"]),
+            Termometro(TERMOMETRO_XS[1], STRINGS["escalas"]["celsius"]),
+            Termometro(TERMOMETRO_XS[2], STRINGS["escalas"]["fahrenheit"]),
         ]
         self.painel_controle = PainelControle(
             rect=(PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H)
@@ -435,7 +492,7 @@ class InterfaceManager:
 def main() -> None:
     pygame.init()
     surface = pygame.display.set_mode((TELA_LARGURA, TELA_ALTURA))
-    pygame.display.set_caption("Simulação de Temperatura")
+    pygame.display.set_caption(STRINGS["titulo_janela"])
     clock = pygame.time.Clock()
     interface = InterfaceManager()
     state = AppState()
