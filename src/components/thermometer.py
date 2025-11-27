@@ -122,7 +122,7 @@ class Termometro:
         
         # Desenhar a base (bolinha) separadamente, sobrepondo o início do termômetro
         base_x = self.x + self.w // 2
-        base_y = self.y + self.h + BASE_RAIO - 5  # Posicionar no início do termômetro
+        base_y = self.y + self.h + BASE_RAIO - 15  # Movido 10px para cima (de -5 para -15)
         pygame.draw.circle(surf, CORES["indicador"], (base_x, base_y), BASE_RAIO)
         pygame.draw.circle(surf, CORES["texto"], (base_x, base_y), BASE_RAIO, 2)
         
