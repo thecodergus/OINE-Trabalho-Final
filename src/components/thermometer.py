@@ -1,11 +1,18 @@
 import pygame
 from typing import Tuple, Optional
-from src.config.settings import (
-    TERMOMETRO_Y, TERMOMETRO_DIM, CORES, THUMB_RAIO, BASE_RAIO, 
-    FONTES, TERMOMETRO_XS, STRINGS
+from ..config.settings import (
+    TERMOMETRO_Y,
+    TERMOMETRO_DIM,
+    CORES,
+    THUMB_RAIO,
+    BASE_RAIO,
+    FONTES,
+    TERMOMETRO_XS,
+    STRINGS,
 )
-from src.core.state import AppState
-from src.temperature_types import TemperatureScale
+from ..core.state import AppState
+from ..temperature_types import TemperatureScale
+
 
 class Termometro:
     def __init__(self, x: int, escala: TemperatureScale) -> None:
@@ -22,11 +29,20 @@ class Termometro:
             # Criar superfície apenas para o termômetro (sem a base)
             self._cache_surface = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
             self._cache_rect = self.rect.copy()
-            
-            pygame.draw.rect(self._cache_surface, (240, 240, 240), 
-                           (0, 0, self.w, self.h), border_radius=8)
-            pygame.draw.rect(self._cache_surface, CORES["termometro_borda"], 
-                           (0, 0, self.w, self.h), 2, border_radius=8)
+
+            pygame.draw.rect(
+                self._cache_surface,
+                (240, 240, 240),
+                (0, 0, self.w, self.h),
+                border_radius=8,
+            )
+            pygame.draw.rect(
+                self._cache_surface,
+                CORES["termometro_borda"],
+                (0, 0, self.w, self.h),
+                2,
+                border_radius=8,
+            )
 
     def valor_para_y(self, valor: float, temp_min: float, temp_max: float) -> int:
         ratio = (valor - temp_min) / (temp_max - temp_min)
@@ -46,7 +62,9 @@ class Termometro:
     def base_pos(self) -> Tuple[int, int]:
         return (self.x + self.w // 2, self.y + self.h + BASE_RAIO)
 
-    def handle_event(self, event: pygame.event.Event, state: AppState) -> Optional[AppState]:
+    def handle_event(
+        self, event: pygame.event.Event, state: AppState
+    ) -> Optional[AppState]:
         thumb_x, thumb_y = self.thumb_pos(state)
         mouse_x, mouse_y = getattr(event, "pos", (None, None))
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -63,7 +81,7 @@ class Termometro:
                     valor_ativo=state.valor_ativo,
                     arrastando=self.escala.value,
                     botao_mais_pressionado=state.botao_mais_pressionado,
-                    botao_menos_pressionado=state.botao_menos_pressionado
+                    botao_menos_pressionado=state.botao_menos_pressionado,
                 )
         elif event.type == pygame.MOUSEBUTTONUP:
             if state.arrastando == self.escala.value:
@@ -74,21 +92,21 @@ class Termometro:
                     valor_ativo=state.valor_ativo,
                     arrastando=None,
                     botao_mais_pressionado=state.botao_mais_pressionado,
-                    botao_menos_pressionado=state.botao_menos_pressionado
+                    botao_menos_pressionado=state.botao_menos_pressionado,
                 )
         elif event.type == pygame.MOUSEMOTION:
             if state.arrastando == self.escala.value and mouse_y is not None:
                 novo_valor = self.y_para_valor(mouse_y, state.temp_min, state.temp_max)
                 novo_valor = state.clamp_valor(novo_valor)
-                
+
                 # Verificar se está tentando aumentar além do limite máximo
                 if novo_valor > state.valor_ativo and not state.pode_aumentar():
                     return None
-                
+
                 # Verificar se está tentando diminuir além do limite mínimo
                 if novo_valor < state.valor_ativo and not state.pode_diminuir():
                     return None
-                
+
                 return AppState(
                     temp_min=state.temp_min,
                     temp_max=state.temp_max,
@@ -96,17 +114,17 @@ class Termometro:
                     valor_ativo=novo_valor,
                     arrastando=self.escala.value,
                     botao_mais_pressionado=state.botao_mais_pressionado,
-                    botao_menos_pressionado=state.botao_menos_pressionado
+                    botao_menos_pressionado=state.botao_menos_pressionado,
                 )
         return None
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
         self._criar_cache()
-        
+
         # Desenhar o termômetro
         if self._cache_surface:
             surf.blit(self._cache_surface, (self.x, self.y))
-        
+
         # Desenhar o nível de preenchimento
         valor = state.valores()[self.escala]
         nivel = (valor - state.temp_min) / (state.temp_max - state.temp_min)
@@ -115,18 +133,20 @@ class Termometro:
             self.x, self.y + self.h - nivel_px, self.w, nivel_px
         )
         pygame.draw.rect(surf, CORES["indicador"], rect_preenchido, border_radius=8)
-        
+
         # Desenhar o thumb (círculo móvel)
         thumb_x, thumb_y = self.thumb_pos(state)
         pygame.draw.circle(surf, CORES["indicador"], (thumb_x, thumb_y), THUMB_RAIO)
         pygame.draw.circle(surf, CORES["texto"], (thumb_x, thumb_y), THUMB_RAIO, 2)
-        
+
         # Desenhar a base (bolinha) separadamente, sobrepondo o início do termômetro
         base_x = self.x + self.w // 2
-        base_y = self.y + self.h + BASE_RAIO - 15  # Movido 10px para cima (de -5 para -15)
+        base_y = (
+            self.y + self.h + BASE_RAIO - 15
+        )  # Movido 10px para cima (de -5 para -15)
         pygame.draw.circle(surf, CORES["indicador"], (base_x, base_y), BASE_RAIO)
         pygame.draw.circle(surf, CORES["texto"], (base_x, base_y), BASE_RAIO, 2)
-        
+
         # Desenhar o texto com o valor
         fonte = pygame.font.SysFont(*FONTES["valor"])
         txt = fonte.render(f"{valor:.2f} {self.escala.symbol}", True, CORES["texto"])

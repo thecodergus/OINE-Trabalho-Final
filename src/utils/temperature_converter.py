@@ -1,17 +1,22 @@
 from typing import Dict
-from src.config.settings import STRINGS
+from ..config.settings import STRINGS
+
 
 def celsius_to_kelvin(c: float) -> float:
     return c + 273.15
 
+
 def celsius_to_fahrenheit(c: float) -> float:
     return c * 9.0 / 5.0 + 32.0
+
 
 def kelvin_to_celsius(k: float) -> float:
     return k - 273.15
 
+
 def fahrenheit_to_celsius(f: float) -> float:
     return (f - 32.0) * 5.0 / 9.0
+
 
 def converter(valor: float, de: str, para: str) -> float:
     if de == para:

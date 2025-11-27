@@ -1,9 +1,14 @@
 import pygame
 import os
-from src.config.settings import (
-    MATERIAL_IMG_Y, MATERIAL_IMG_DIM, CORES, MATERIAL_LABEL_Y, FONTES
+from ..config.settings import (
+    MATERIAL_IMG_Y,
+    MATERIAL_IMG_DIM,
+    CORES,
+    MATERIAL_LABEL_Y,
+    FONTES,
 )
-from src.core.state import AppState
+from ..core.state import AppState
+
 
 class MaterialDisplay:
     def __init__(self, x: int, nome: str, img_path: str) -> None:
