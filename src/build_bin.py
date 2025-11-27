@@ -11,17 +11,11 @@ def build() -> None:
     base_dir = Path(__file__).parent.parent.resolve()
     src_dir = base_dir / "src"
     main_py = base_dir / "main.py"
-    assets_png = src_dir / "assets" / "wireframe.png"
-    controller_dir = src_dir / "controller"
-    model_dir = src_dir / "model"
-    view_dir = src_dir / "view"
+    assets_dir = src_dir / "assets"
 
     # Validação dos arquivos e diretórios
     required = [
-        (assets_png, "src/assets/wireframe.png"),
-        (controller_dir, "src/controller/"),
-        (model_dir, "src/model/"),
-        (view_dir, "src/view/"),
+        (assets_dir, "src/assets/"),
         (main_py, "main.py"),
     ]
     missing = [desc for path, desc in required if not path.exists()]
@@ -41,19 +35,15 @@ def build() -> None:
         "--name",
         "trabalho-final",
         "--hidden-import=pygame",
-        "--hidden-import=controller.slider_controllet",
-        "--hidden-import=model.state",
-        "--hidden-import=view.label",
-        "--hidden-import=view.painel_controle",
-        "--hidden-import=view.slider",
+        "--hidden-import=src.core.state",
+        "--hidden-import=src.components.thermometer",
+        "--hidden-import=src.components.control_panel",
+        "--hidden-import=src.components.material_display",
+        "--hidden-import=src.interface.manager",
+        "--hidden-import=src.utils.temperature_converter",
+        "--hidden-import=src.config.settings",
         "--add-data",
-        f"{assets_png}{sep}assets",
-        "--add-data",
-        f"{controller_dir}{sep}controller",
-        "--add-data",
-        f"{model_dir}{sep}model",
-        "--add-data",
-        f"{view_dir}{sep}view",
+        f"{assets_dir}{sep}assets",
         str(main_py),
     ]
     print("Executando:", " ".join(str(arg) for arg in cmd))
