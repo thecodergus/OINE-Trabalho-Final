@@ -29,36 +29,20 @@ class PainelControle:
             
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.botao_mais.collidepoint(event.pos):
-                # Quando + é selecionado: multiplicar os valores por 2
-                # Baseado na temperatura (-50, 50) ºC
-                base_min = -50.0
-                base_max = 50.0
+                # Ampliar o intervalo de temperatura (zoom in)
+                centro = (state.temp_min + state.temp_max) / 2
+                amplitude = (state.temp_max - state.temp_min) * 0.5  # Reduz pela metade
                 
-                # Calcular a distância dos valores atuais em relação à base
-                distancia_min = state.temp_min - base_min
-                distancia_max = state.temp_max - base_max
+                novo_min = centro - amplitude
+                novo_max = centro + amplitude
                 
-                # Multiplicar as distâncias por 2
-                nova_distancia_min = distancia_min * 2
-                nova_distancia_max = distancia_max * 2
+                # Manter limites absolutos
+                novo_min = max(novo_min, -200.0)
+                novo_max = min(novo_max, 200.0)
                 
-                # Calcular os novos valores
-                novo_min = base_min + nova_distancia_min
-                novo_max = base_max + nova_distancia_max
-                
-                # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 50
-                novo_min = max(novo_min, -50.0)
-                novo_max = max(novo_max, 50.0)
-                
-                # Atualizar também o valor ativo (aumenta proporcionalmente)
-                # Usando o centro do intervalo como referência
-                centro_atual = (state.temp_min + state.temp_max) / 2
-                centro_novo = (novo_min + novo_max) / 2
-                distancia_centro = state.valor_ativo - centro_atual
-                nova_distancia_centro = distancia_centro * 2
-                novo_valor = centro_novo + nova_distancia_centro
-                # Garantir que o valor esteja dentro dos novos limites
-                novo_valor = max(novo_min, min(novo_max, novo_valor))
+                # Ajustar valor ativo proporcionalmente
+                proporcao = (state.valor_ativo - state.temp_min) / (state.temp_max - state.temp_min)
+                novo_valor = novo_min + proporcao * (novo_max - novo_min)
                 
                 novo_state = AppState(
                     temp_min=novo_min,
@@ -70,36 +54,20 @@ class PainelControle:
                     botao_menos_pressionado=state.botao_menos_pressionado
                 )
             if self.botao_menos.collidepoint(event.pos):
-                # Quando - é selecionado: dividir os valores por 2
-                # Baseado na temperatura (-50, 50) ºC
-                base_min = -50.0
-                base_max = 50.0
+                # Reduzir o intervalo de temperatura (zoom out)
+                centro = (state.temp_min + state.temp_max) / 2
+                amplitude = (state.temp_max - state.temp_min) * 2.0  # Dobra a amplitude
                 
-                # Calcular a distância dos valores atuais em relação à base
-                distancia_min = state.temp_min - base_min
-                distancia_max = state.temp_max - base_max
+                novo_min = centro - amplitude
+                novo_max = centro + amplitude
                 
-                # Dividir as distâncias por 2
-                nova_distancia_min = distancia_min / 2
-                nova_distancia_max = distancia_max / 2
+                # Manter limites absolutos
+                novo_min = max(novo_min, -200.0)
+                novo_max = min(novo_max, 200.0)
                 
-                # Calcular os novos valores
-                novo_min = base_min + nova_distancia_min
-                novo_max = base_max + nova_distancia_max
-                
-                # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 50
-                novo_min = max(novo_min, -50.0)
-                novo_max = max(novo_max, 50.0)
-                
-                # Atualizar também o valor ativo (diminui proporcionalmente)
-                # Usando o centro do intervalo como referência
-                centro_atual = (state.temp_min + state.temp_max) / 2
-                centro_novo = (novo_min + novo_max) / 2
-                distancia_centro = state.valor_ativo - centro_atual
-                nova_distancia_centro = distancia_centro / 2
-                novo_valor = centro_novo + nova_distancia_centro
-                # Garantir que o valor esteja dentro dos novos limites
-                novo_valor = max(novo_min, min(novo_max, novo_valor))
+                # Ajustar valor ativo proporcionalmente
+                proporcao = (state.valor_ativo - state.temp_min) / (state.temp_max - state.temp_min)
+                novo_valor = novo_min + proporcao * (novo_max - novo_min)
                 
                 novo_state = AppState(
                     temp_min=novo_min,
