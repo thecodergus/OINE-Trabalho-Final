@@ -40,15 +40,23 @@ class AppState:
     def atinge_limite_maximo(self) -> bool:
         """Verifica se algum dos valores atingiu o limite máximo."""
         valores = self.valores()
-        # Verifica se qualquer escala atingiu seu limite máximo
-        return (valores[STRINGS["escalas"]["celsius"]] >= self.temp_max or
-                valores[STRINGS["escalas"]["kelvin"]] >= celsius_to_kelvin(self.temp_max) or
-                valores[STRINGS["escalas"]["fahrenheit"]] >= celsius_to_fahrenheit(self.temp_max))
+        # Verifica se qualquer escala atingiu seu limite máximo (considerando conversões corretas)
+        celsius_max = self.temp_max
+        kelvin_max = celsius_to_kelvin(celsius_max)
+        fahrenheit_max = celsius_to_fahrenheit(celsius_max)
+        
+        return (valores[STRINGS["escalas"]["celsius"]] >= celsius_max or
+                valores[STRINGS["escalas"]["kelvin"]] >= kelvin_max or
+                valores[STRINGS["escalas"]["fahrenheit"]] >= fahrenheit_max)
     
     def atinge_limite_minimo(self) -> bool:
         """Verifica se algum dos valores atingiu o limite mínimo."""
         valores = self.valores()
-        # Verifica se qualquer escala atingiu seu limite mínimo
-        return (valores[STRINGS["escalas"]["celsius"]] <= self.temp_min or
-                valores[STRINGS["escalas"]["kelvin"]] <= celsius_to_kelvin(self.temp_min) or
-                valores[STRINGS["escalas"]["fahrenheit"]] <= celsius_to_fahrenheit(self.temp_min))
+        # Verifica se qualquer escala atingiu seu limite mínimo (considerando conversões corretas)
+        celsius_min = self.temp_min
+        kelvin_min = celsius_to_kelvin(celsius_min)
+        fahrenheit_min = celsius_to_fahrenheit(celsius_min)
+        
+        return (valores[STRINGS["escalas"]["celsius"]] <= celsius_min or
+                valores[STRINGS["escalas"]["kelvin"]] <= kelvin_min or
+                valores[STRINGS["escalas"]["fahrenheit"]] <= fahrenheit_min)
