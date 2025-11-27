@@ -71,19 +71,9 @@ class PainelControle:
         return novo_state
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
-        pygame.draw.rect(
-            surf,
-            CORES["painel"],
-            (PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H),
-            border_radius=16,
-        )
-        pygame.draw.rect(
-            surf,
-            CORES["painel_borda"],
-            (PAINEL_X, PAINEL_Y, PAINEL_W, PAINEL_H),
-            2,
-            border_radius=16,
-        )
+        # Removido o desenho do fundo cinza e da borda preta
+        # Desenha apenas os botões e o texto
+        
         fonte = pygame.font.SysFont(*FONTES["rotulo"])
         txt = fonte.render(
             f"({int(state.temp_min)}, {int(state.temp_max)}) ºC", True, CORES["texto"]
