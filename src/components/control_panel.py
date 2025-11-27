@@ -1,5 +1,9 @@
 import pygame
+
+from ..utils.temperature_converter import converter
 from ..config.settings import (
+    BASE_MAX,
+    BASE_MIN,
     PAINEL_X,
     PAINEL_Y,
     PAINEL_W,
@@ -40,21 +44,18 @@ class PainelControle:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.botao_mais.collidepoint(event.pos):
                 # Quando + é selecionado: multiplicar os valores por 2
-                # Baseado na temperatura (-100, 100) ºC
-                base_min = -100.0
-                base_max = 100.0
 
                 # Calcular a distância dos valores atuais em relação à base
-                distancia_min = state.temp_min - base_min
-                distancia_max = state.temp_max - base_max
+                distancia_min = state.temp_min - BASE_MIN
+                distancia_max = state.temp_max - BASE_MAX
 
                 # Multiplicar as distâncias por 2
                 nova_distancia_min = distancia_min * 2
                 nova_distancia_max = distancia_max * 2
 
                 # Calcular os novos valores
-                novo_min = base_min + nova_distancia_min
-                novo_max = base_max + nova_distancia_max
+                novo_min = BASE_MIN + nova_distancia_min
+                novo_max = BASE_MAX + nova_distancia_max
 
                 # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 50
                 novo_min = max(novo_min, -100.0)
@@ -81,21 +82,18 @@ class PainelControle:
                 )
             if self.botao_menos.collidepoint(event.pos):
                 # Quando - é selecionado: dividir os valores por 2
-                # Baseado na temperatura (-50, 50) ºC
-                base_min = -100.0
-                base_max = 100.0
 
                 # Calcular a distância dos valores atuais em relação à base
-                distancia_min = state.temp_min - base_min
-                distancia_max = state.temp_max - base_max
+                distancia_min = state.temp_min - BASE_MIN
+                distancia_max = state.temp_max - BASE_MAX
 
                 # Dividir as distâncias por 2
                 nova_distancia_min = distancia_min / 2
                 nova_distancia_max = distancia_max / 2
 
                 # Calcular os novos valores
-                novo_min = base_min + nova_distancia_min
-                novo_max = base_max + nova_distancia_max
+                novo_min = BASE_MIN + nova_distancia_min
+                novo_max = BASE_MAX + nova_distancia_max
 
                 # Aplicar limites: temp_min não pode ser menor que -50, temp_max não pode ser menor que 50
                 novo_min = max(novo_min, -100.0)
@@ -139,9 +137,15 @@ class PainelControle:
         # Removido o desenho do fundo cinza e da borda preta
         # Desenha apenas os botões e o texto
 
+        escala_ativa = state.escala_ativa
+        min_convertido = converter(state.temp_min, "C", escala_ativa.symbol)
+        max_convertido = converter(state.temp_max, "C", escala_ativa.symbol)
+
         fonte = pygame.font.SysFont(*FONTES["rotulo"])
         txt = fonte.render(
-            f"({int(state.temp_min)}, {int(state.temp_max)}) ºC", True, CORES["texto"]
+            f"({int(min_convertido)}, {int(max_convertido)}) {escala_ativa.symbol}",
+            True,
+            CORES["texto"],
         )
         surf.blit(txt, (PAINEL_X + (PAINEL_W - txt.get_width()) // 2, FAIXA_LABEL_Y))
 
