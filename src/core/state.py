@@ -1,7 +1,13 @@
 from dataclasses import dataclass
 from typing import Optional, Dict
 from ..temperature_types import TemperatureScale
-from ..config.settings import STRINGS
+from ..config.settings import (
+    TEMP_MIN_INICIAL, 
+    TEMP_MAX_INICIAL, 
+    VALOR_ATIVO_INICIAL,
+    TEMP_MIN_LIMITE,
+    TEMP_MAX_LIMITE
+)
 from ..utils.temperature_converter import (
     celsius_to_kelvin,
     celsius_to_fahrenheit,
@@ -12,10 +18,10 @@ from ..utils.temperature_converter import (
 
 @dataclass(frozen=True, slots=True)
 class AppState:
-    temp_min: float = -50.0
-    temp_max: float = 50.0
+    temp_min: float = TEMP_MIN_INICIAL
+    temp_max: float = TEMP_MAX_INICIAL
     escala_ativa: TemperatureScale = TemperatureScale.CELSIUS
-    valor_ativo: float = 20.0
+    valor_ativo: float = VALOR_ATIVO_INICIAL
     arrastando: Optional[str] = None
     botao_mais_pressionado: bool = False
     botao_menos_pressionado: bool = False
@@ -46,24 +52,16 @@ class AppState:
 
     def atinge_limite_maximo(self) -> bool:
         """Verifica se algum dos valores atingiu o limite máximo."""
-        valores = self.valores()
-        # Verifica se qualquer escala atingiu seu limite máximo absoluto
+        # Usa os limites configurados em settings.py
         return (
-            valores[TemperatureScale.CELSIUS] >= self.temp_max
-            or valores[TemperatureScale.KELVIN] >= celsius_to_kelvin(self.temp_max)
-            or valores[TemperatureScale.FAHRENHEIT]
-            >= celsius_to_fahrenheit(self.temp_max)
+            self.temp_max >= TEMP_MAX_LIMITE
         )
 
     def atinge_limite_minimo(self) -> bool:
         """Verifica se algum dos valores atingiu o limite mínimo."""
-        valores = self.valores()
-        # Verifica se qualquer escala atingiu seu limite mínimo absoluto
+        # Usa os limites configurados em settings.py
         return (
-            valores[TemperatureScale.CELSIUS] <= self.temp_min
-            or valores[TemperatureScale.KELVIN] <= celsius_to_kelvin(self.temp_min)
-            or valores[TemperatureScale.FAHRENHEIT]
-            <= celsius_to_fahrenheit(self.temp_min)
+            self.temp_min <= TEMP_MIN_LIMITE
         )
 
     def pode_aumentar(self) -> bool:
