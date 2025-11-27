@@ -49,9 +49,7 @@ def calcular_termometro_xs() -> Tuple[int, int, int]:
     espacamento = (area_util - TERMOMETRO_COUNT * TERMOMETRO_DIM[0]) // (TERMOMETRO_COUNT - 1)
     xs = [margem_lateral + i * (TERMOMETRO_DIM[0] + espacamento) for i in range(TERMOMETRO_COUNT)]
     # Convertendo explicitamente para Tuple[int, int, int] para satisfazer o type hint
-    return tuple(xs)
-
-
+    return (xs[0], xs[1], xs[2])
 
 TERMOMETRO_XS = calcular_termometro_xs()
 
