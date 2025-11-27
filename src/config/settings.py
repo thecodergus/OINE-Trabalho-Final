@@ -1,15 +1,15 @@
 from typing import Tuple, Dict, List
 import os
-from .temperature_types import TemperatureScale
+from ..temperature_types import TemperatureScale
 
 # Valores padrão de temperatura
-TEMP_MIN_INICIAL = -50.0
-TEMP_MAX_INICIAL = 50.0
+TEMP_MIN_INICIAL = -100.0
+TEMP_MAX_INICIAL = 100.0
 VALOR_ATIVO_INICIAL = 20.0
 
 # Base para cálculos nos botões + e -
-BASE_MIN = -50.0
-BASE_MAX = 50.0
+BASE_MIN = -100.0
+BASE_MAX = 100.0
 
 # Limites para os valores de temperatura
 TEMP_MIN_LIMITE = -100.0
