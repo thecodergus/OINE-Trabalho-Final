@@ -60,7 +60,8 @@ class MaterialDisplay:
             # Try the path as-is first
             if os.path.exists(img_path):
                 image = pygame.image.load(img_path).convert_alpha()
-                return pygame.transform.scale(image, (self.w, self.h))
+                scaled_image = pygame.transform.scale(image, (self.w, self.h))
+                return scaled_image
 
             # If that fails, try relative to project root
             # Get the project root (assuming this file is in src/components)
@@ -70,29 +71,41 @@ class MaterialDisplay:
 
             if os.path.exists(full_path):
                 image = pygame.image.load(full_path).convert_alpha()
-                return pygame.transform.scale(image, (self.w, self.h))
+                scaled_image = pygame.transform.scale(image, (self.w, self.h))
+                return scaled_image
 
-            raise FileNotFoundError(
-                f"Arquivo não encontrado: {img_path} ou {full_path}"
-            )
+            error_msg = f"Arquivo não encontrado: {img_path} ou {full_path}"
+            raise FileNotFoundError(error_msg)
         except (pygame.error, FileNotFoundError) as e:
-            print(f"Erro ao carregar imagem {img_path}: {e}")
-            return self._create_placeholder_image()
+            placeholder = self._create_placeholder_image()
+            return placeholder
 
     def _create_placeholder_image(self) -> pygame.Surface:
         """Cria uma imagem placeholder quando a imagem original não pode ser carregada."""
         image = pygame.Surface((self.w, self.h), pygame.SRCALPHA)
-        image.fill((0, 0, 0, 0))
-        draw_rounded_rect_with_border(
-            image,
-            pygame.Rect(0, 0, self.w, self.h),
-            CORES["material_fundo"],
-            CORES["material_fundo"],  # Same color for border since we want solid fill
-            0,  # No border
-            BORDA_ARREDONDADA,  # Border radius
+        # Fill with a visible color for debugging (red-ish) so we can tell it's the placeholder
+        image.fill((255, 0, 0, 128))  # Semi-transparent red to make it obvious
+
+        # Draw a border to make it more visible
+        pygame.draw.rect(image, (255, 255, 255, 255), (0, 0, self.w, self.h), 3)
+
+        # Draw an X to make it obvious this is a placeholder
+        pygame.draw.line(
+            image, (255, 255, 255, 255), (5, 5), (self.w - 5, self.h - 5), 3
         )
-        pygame.draw.line(image, CORES["material_borda"], (0, 0), (self.w, self.h), 2)
-        pygame.draw.line(image, CORES["material_borda"], (self.w, 0), (0, self.h), 2)
+        pygame.draw.line(
+            image, (255, 255, 255, 255), (self.w - 5, 5), (5, self.h - 5), 3
+        )
+
+        # Draw some text to indicate this is a placeholder
+        try:
+            font = pygame.font.SysFont(None, 20)
+            text = font.render("NO IMG", True, (255, 255, 255, 255))
+            text_rect = text.get_rect(center=(self.w // 2, self.h // 2))
+            image.blit(text, text_rect)
+        except:
+            pass  # If font fails, just continue without text
+
         return image
 
     def _update_image_based_on_temperature(self, state: AppState) -> None:
@@ -101,95 +114,58 @@ class MaterialDisplay:
         active_temp_celsius = state.valor_ativo
 
         # Based on the material type and current temperature, select appropriate image
+        target_image_path = None
         if self.nome == "Água":
             # Get water state (solid, liquid, gas) based on temperature
             if active_temp_celsius <= self.state_mapping["solid"]:
                 # Solid state - ice
-                try:
-                    new_image = self._load_image("src/assets/Agua-solido.png")
-                    if new_image is not None:
-                        self.image = new_image
-                except:
-                    # If image not available, default to liquid for demonstration
-                    pass
+                target_image_path = "src/assets/Agua-solido.png"
             elif active_temp_celsius <= self.state_mapping["gas"]:
                 # Liquid state - water
-                try:
-                    new_image = self._load_image("src/assets/Agua-liquida.png")
-                    if new_image is not None:
-                        self.image = new_image
-                except:
-                    # If image not available, stay with current image
-                    pass
+                target_image_path = "src/assets/Agua-liquida.png"
             else:
                 # Gas state - steam
-                try:
-                    new_image = self._load_image("src/assets/Agua-gasosa.png")
-                    if new_image is not None:
-                        self.image = new_image
-                except:
-                    # If image not available, default to liquid for demonstration
-                    pass
+                target_image_path = "src/assets/Agua-gasosa.png"
 
         elif self.nome == "Vidro":
             # For glass, decide based on temperature
             if active_temp_celsius < self.state_mapping["solid"]:
                 # Solid state - regular glass
-                try:
-                    new_image = self._load_image("src/assets/Vidro-solido.png")
-                    if new_image is not None:
-                        self.image = new_image
-                except:
-                    # If image not available, keep original for demo
-                    pass
+                target_image_path = "src/assets/Vidro-solido.png"
             elif active_temp_celsius < self.state_mapping["gas"]:
                 # Liquid state (molten glass)
-                try:
-                    new_image = self._load_image("src/assets/Vidro-liquida.png")
-                    if new_image is not None:
-                        self.image = new_image
-                except:
-                    # If image not available, keep original for demo
-                    pass
+                target_image_path = "src/assets/Vidro-liquida.png"
             else:
                 # Gas state (very high temperature)
-                try:
-                    new_image = self._load_image("src/assets/Vidro-gasosa.png")
-                    if new_image is not None:
-                        self.image = new_image
-                except:
-                    # If image not available, keep original for demo
-                    pass
+                target_image_path = "src/assets/Vidro-gasosa.png"
 
         elif self.nome == "Alumínio":
             # For aluminum, decide based on temperature
             if active_temp_celsius < self.state_mapping["solid"]:
                 # Solid state - solid aluminum
-                try:
-                    new_image = self._load_image("src/assets/Aluminio-solido.png")
-                    if new_image is not None:
-                        self.image = new_image
-                except:
-                    # If image not available, keep original for demo
-                    pass
+                target_image_path = "src/assets/Aluminio-solido.png"
             elif active_temp_celsius < self.state_mapping["gas"]:
                 # Liquid state (molten aluminum)
-                try:
-                    new_image = self._load_image("src/assets/Aluminio-liquida.png")
-                    if new_image is not None:
-                        self.image = new_image
-                except:
-                    # If image not available, keep original for demo
-                    pass
+                target_image_path = "src/assets/Aluminio-liquida.png"
             else:
                 # Gas state (very high temperature)
-                try:
-                    new_image = self._load_image("src/assets/Aluminio-gasosa.png")
-                    if new_image is not None:
-                        self.image = new_image
-                except:
-                    # If image not available, keep original for demo
-                    pass
+                target_image_path = "src/assets/Aluminio-gasosa.png"
+
+        # Only try to load a new image if we have a target path
+        if target_image_path:
+            try:
+                new_image = self._load_image(target_image_path)
+                # Only update if we successfully loaded a new image
+                if (
+                    new_image is not None
+                    and new_image != self._create_placeholder_image()
+                ):
+                    self.image = new_image
+                # If loading fails, keep the current image (don't replace with None or broken image)
+            except Exception as e:
+                print(f"Erro ao atualizar imagem para {self.nome}: {e}")
+                # Keep current image if update fails
+                pass
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
         """Renderiza o display do material."""
@@ -217,5 +193,5 @@ class MaterialDisplay:
     def _render_border(self, surf: pygame.Surface) -> None:
         """Renderiza a borda ao redor da imagem do material."""
         draw_rounded_rect_with_border(
-            surf, self.rect, (0, 0, 0, 0), CORES["material_borda"], 2, 8
+            surf, self.rect, (0, 0, 0), CORES["material_borda"], 2, 8
         )
