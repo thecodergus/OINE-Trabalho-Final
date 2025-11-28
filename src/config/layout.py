@@ -16,7 +16,7 @@ from .constants import (
     MATERIAL_COUNT,
 )
 
-def calcular_termometro_xs() -> tuple[int, int, int]:
+def calcular_termometro_xs() -> tuple[int, ...]:
     """Calcula as posições X dos termômetros."""
     margem_lateral = int(TERMOMETRO_MARGEM_BASE * TERMOMETRO_MARGEM_MULTIPLIER) + TERMOMETRO_MARGEM_OFFSET
     area_util = TELA_LARGURA - 2 * margem_lateral - TERMOMETRO_AREA_REDUCAO

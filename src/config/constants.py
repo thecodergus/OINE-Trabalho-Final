@@ -10,8 +10,8 @@ BASE_MIN = -100.0
 BASE_MAX = 100.0
 
 # Limites para os valores de temperatura
-TEMP_MIN_LIMITE = float('-inf')  # No lower limit
-TEMP_MAX_LIMITE = float('inf')  # No upper limit for positive temperatures
+TEMP_MIN_LIMITE = float("-inf")  # No lower limit
+TEMP_MAX_LIMITE = float("inf")  # No upper limit for positive temperatures
 
 # Dimensões da tela
 TELA_LARGURA, TELA_ALTURA = 1024, 768
@@ -25,7 +25,9 @@ BASE_RAIO = 25  # Aumentado de 22 para 25
 DESLOCAMENTO_TERMOMETROS = 80  # Ajuste esse valor conforme necessário
 TERMOMETRO_MARGEM_BASE = 159
 TERMOMETRO_MARGEM_MULTIPLIER = 0.8
-TERMOMETRO_MARGEM_OFFSET = 80  # Increased by 30 pixels to move thermometers to the right
+TERMOMETRO_MARGEM_OFFSET = (
+    80  # Increased by 30 pixels to move thermometers to the right
+)
 TERMOMETRO_AREA_REDUCAO = 150
 
 # Constantes de estilo
