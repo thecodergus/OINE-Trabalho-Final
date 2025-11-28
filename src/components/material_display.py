@@ -80,9 +80,10 @@ class MaterialDisplay:
     @staticmethod
     def _img_path(material_type: MaterialType, state: MaterialState) -> str:
         """
-        Função pura: retorna o caminho da imagem para o material e estado.
+        Função pura: retorna o caminho RELATIVO da imagem para o material e estado.
+        Corrigido: retorna sempre a partir de 'assets/', nunca inclui 'src/'.
         """
-        base = "src/assets"
+        base = "assets"
         match material_type, state:
             case MaterialType.AGUA, MaterialState.SOLIDO:
                 return f"{base}/Agua-solido.png"
@@ -133,21 +134,22 @@ class MaterialDisplay:
     ) -> pygame.Surface:
         """
         Carrega e converte a imagem, usando cache. Fallback para placeholder.
+        Corrigido: utiliza caminho relativo e resource_path correto.
         """
         key = (material_type, state)
         if key in cls._image_cache:
             return cls._image_cache[key]
-        path = cls._img_path(material_type, state)
-        abs_path = resource_path(os.path.abspath(path))
+        path = cls._img_path(material_type, state)  # Ex: 'assets/Agua-solido.png'
+        img_path = resource_path(path)  # NÃO usar abspath!
         try:
-            if not os.path.exists(abs_path):
-                raise FileNotFoundError(f"Imagem não encontrada: {abs_path}")
-            img = pygame.image.load(abs_path).convert_alpha()
+            if not os.path.exists(img_path):
+                raise FileNotFoundError(f"Imagem não encontrada: {img_path}")
+            img = pygame.image.load(img_path).convert_alpha()
             img = pygame.transform.scale(img, (w, h))
             cls._image_cache[key] = img
             return img
         except Exception as e:
-            print(f"[MaterialDisplay] Falha ao carregar '{abs_path}': {e}")
+            print(f"[MaterialDisplay] Falha ao carregar '{img_path}': {e}")
             placeholder = cls._get_placeholder(w, h)
             cls._image_cache[key] = placeholder
             return placeholder

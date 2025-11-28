@@ -13,8 +13,11 @@ def carregar_wallpaper(
     """
     Função pura para carregar e redimensionar o wallpaper.
     Retorna None se o arquivo não existir ou não puder ser carregado.
+    Corrigido: usa caminho relativo e resource_path correto.
     """
-    abs_path = resource_path(os.path.abspath(path))
+    abs_path = resource_path(
+        path
+    )  # path já deve ser relativo, ex: 'assets/wallpaper.jpg'
     if not os.path.exists(abs_path):
         print(f"[main] Wallpaper não encontrado: {abs_path}")
         return None
@@ -38,8 +41,9 @@ def main() -> None:
         clock: pygame.time.Clock = pygame.time.Clock()
         interface: InterfaceManager = InterfaceManager()
         state: AppState = AppState()
+        # Corrigido: use caminho relativo para o asset
         wallpaper: Optional[pygame.Surface] = carregar_wallpaper(
-            os.path.join("src", "assets", "wallpaper.jpg"), TELA_LARGURA, TELA_ALTURA
+            "assets/wallpaper.jpg", TELA_LARGURA, TELA_ALTURA
         )
     except Exception as e:
         print(f"[main] Falha na inicialização: {e}")
