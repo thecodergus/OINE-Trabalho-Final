@@ -4,6 +4,7 @@ from typing import Optional
 from src.config.settings import CORES, TELA_LARGURA, TELA_ALTURA, STRINGS
 from src.core.state import AppState
 from src.interface.manager import InterfaceManager
+from src.utils.load_images import resource_path
 
 
 def carregar_wallpaper(
@@ -13,7 +14,7 @@ def carregar_wallpaper(
     Função pura para carregar e redimensionar o wallpaper.
     Retorna None se o arquivo não existir ou não puder ser carregado.
     """
-    abs_path = os.path.abspath(path)
+    abs_path = resource_path(os.path.abspath(path))
     if not os.path.exists(abs_path):
         print(f"[main] Wallpaper não encontrado: {abs_path}")
         return None

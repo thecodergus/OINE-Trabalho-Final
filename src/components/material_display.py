@@ -3,6 +3,8 @@ from typing import ClassVar, Dict, Tuple, Optional
 import pygame
 import os
 
+from utils.load_images import resource_path
+
 
 class MaterialType(Enum):
     """Enumeração para tipos de materiais."""
@@ -136,7 +138,7 @@ class MaterialDisplay:
         if key in cls._image_cache:
             return cls._image_cache[key]
         path = cls._img_path(material_type, state)
-        abs_path = os.path.abspath(path)
+        abs_path = resource_path(os.path.abspath(path))
         try:
             if not os.path.exists(abs_path):
                 raise FileNotFoundError(f"Imagem não encontrada: {abs_path}")

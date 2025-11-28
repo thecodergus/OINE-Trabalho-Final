@@ -5,6 +5,7 @@ import shutil
 import logging
 from typing import List, Tuple
 from dataclasses import dataclass
+from itertools import chain
 
 # Configuração de logging estruturado
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
@@ -49,10 +50,21 @@ def clean_previous_builds(dist_dir: Path, build_dir: Path) -> None:
             logging.info("Diretório removido: %s", d)
 
 
+def discover_image_files(assets_dir: Path) -> List[Path]:
+    """
+    Função pura. Descobre recursivamente todos os arquivos .png e .jpg em assets_dir.
+    Retorna lista imutável de Paths.
+    """
+    return list(chain(assets_dir.rglob("*.png"), assets_dir.rglob("*.jpg")))
+
+
 def build_pyinstaller_command(config: BuildConfig) -> List[str]:
-    """Monta o comando do PyInstaller com todos os parâmetros necessários."""
-    sep = ";" if sys.platform == "win32" else ":"
-    cmd = [
+    """
+    Monta o comando do PyInstaller incluindo todos os arquivos .png e .jpg de assets,
+    preservando a estrutura relativa e tratando caminhos com espaços.
+    """
+    sep: str = ";" if sys.platform == "win32" else ":"
+    cmd: List[str] = [
         sys.executable,
         "-m",
         "PyInstaller",
@@ -69,7 +81,23 @@ def build_pyinstaller_command(config: BuildConfig) -> List[str]:
     ]
     for module in config.hidden_imports:
         cmd.extend(["--hidden-import", module])
-    cmd.extend(["--add-data", f"{config.assets_dir}{sep}assets"])
+
+    # Descoberta funcional dos arquivos de imagem
+    image_files: List[Path] = discover_image_files(config.assets_dir)
+    if not image_files:
+        logging.warning(
+            "Nenhum arquivo .png ou .jpg encontrado em %s", config.assets_dir
+        )
+
+    for img in image_files:
+        # Caminho relativo a partir do diretório assets_dir
+        rel_path: Path = img.relative_to(config.assets_dir)
+        # Destino no bundle: assets/rel_path
+        dest_path: Path = Path("assets") / rel_path
+        # Formatação correta: --add-data=SOURCE;DEST (sem aspas)
+        arg: str = f"--add-data={str(img)}{sep}{dest_path.as_posix()}"
+        cmd.append(arg)
+
     cmd.append(str(config.main_py))
     return cmd
 
@@ -129,6 +157,7 @@ def build() -> None:
             "src.components.material_display",
             "src.interface.manager",
             "src.utils.temperature_converter",
+            "src.utils.load_images",
             "src.config.settings",
         ),
         dist_dir=dist_dir,
