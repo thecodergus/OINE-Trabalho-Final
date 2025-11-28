@@ -18,7 +18,7 @@ TELA_LARGURA, TELA_ALTURA = 1024, 768
 
 # Dimensões e posições dos termômetros
 TERMOMETRO_DIM = (32, 293)
-TERMOMETRO_Y = 111
+TERMOMETRO_Y = 100
 TERMOMETRO_COUNT = 3
 THUMB_RAIO = 18
 BASE_RAIO = 25  # Aumentado de 22 para 25
