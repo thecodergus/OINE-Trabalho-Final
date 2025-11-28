@@ -1,28 +1,56 @@
 from pathlib import Path
 import subprocess
 import sys
+import shutil
+import logging
+from typing import List, Tuple
+from dataclasses import dataclass
+
+# Configuração de logging estruturado
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
 
 
-def build() -> None:
-    """
-    Gera um binário único (.exe) do projeto, incluindo assets, módulos e dependências externas.
-    Executa o PyInstaller com parâmetros otimizados para Windows e Pygame.
-    """
-    base_dir = Path(__file__).parent.parent.resolve()
-    src_dir = base_dir / "src"
-    main_py = base_dir / "main.py"
-    assets_dir = src_dir / "assets"
+@dataclass(frozen=True, slots=True)
+class BuildConfig:
+    main_py: Path
+    assets_dir: Path
+    hidden_imports: Tuple[str, ...]
+    dist_dir: Path
+    build_dir: Path
+    exe_name: str = "trabalho-final"
 
-    # Validação dos arquivos e diretórios
-    required = [
-        (assets_dir, "src/assets/"),
-        (main_py, "main.py"),
-    ]
+
+def validate_paths(required: List[Tuple[Path, str]]) -> None:
+    """Valida a existência dos arquivos e diretórios essenciais do projeto."""
     missing = [desc for path, desc in required if not path.exists()]
     if missing:
-        print("❌ Arquivos/diretórios ausentes:", ", ".join(missing))
-        sys.exit(1)
+        logging.error("Arquivos/diretórios ausentes: %s", ", ".join(missing))
+        raise FileNotFoundError(f"Arquivos/diretórios ausentes: {', '.join(missing)}")
 
+
+def is_pyinstaller_installed() -> bool:
+    """Verifica se o PyInstaller está instalado no ambiente atual."""
+    try:
+        subprocess.run(
+            [sys.executable, "-m", "PyInstaller", "--version"],
+            check=True,
+            capture_output=True,
+        )
+        return True
+    except Exception:
+        return False
+
+
+def clean_previous_builds(dist_dir: Path, build_dir: Path) -> None:
+    """Remove diretórios de build anteriores para evitar resíduos."""
+    for d in (dist_dir, build_dir):
+        if d.exists():
+            shutil.rmtree(d)
+            logging.info("Diretório removido: %s", d)
+
+
+def build_pyinstaller_command(config: BuildConfig) -> List[str]:
+    """Monta o comando do PyInstaller com todos os parâmetros necessários."""
     sep = ";" if sys.platform == "win32" else ":"
     cmd = [
         sys.executable,
@@ -33,18 +61,92 @@ def build() -> None:
         "--noconfirm",
         "--clean",
         "--name",
-        "trabalho-final",
-        "--hidden-import=pygame",
-        "--hidden-import=src.core.state",
-        "--hidden-import=src.components.thermometer",
-        "--hidden-import=src.components.control_panel",
-        "--hidden-import=src.components.material_display",
-        "--hidden-import=src.interface.manager",
-        "--hidden-import=src.utils.temperature_converter",
-        "--hidden-import=src.config.settings",
-        "--add-data",
-        f"{assets_dir}{sep}assets",
-        str(main_py),
+        config.exe_name,
+        "--distpath",
+        str(config.dist_dir),
+        "--workpath",
+        str(config.build_dir),
     ]
-    print("Executando:", " ".join(str(arg) for arg in cmd))
-    subprocess.run(cmd, check=True)
+    for module in config.hidden_imports:
+        cmd.extend(["--hidden-import", module])
+    cmd.extend(["--add-data", f"{config.assets_dir}{sep}assets"])
+    cmd.append(str(config.main_py))
+    return cmd
+
+
+def run_build(cmd: List[str]) -> None:
+    """Executa o comando do PyInstaller e trata possíveis erros."""
+    logging.info("Executando: %s", " ".join(str(arg) for arg in cmd))
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        logging.error("Erro ao executar build: %s", e)
+        raise RuntimeError(f"Erro ao executar build: {e}") from e
+    except FileNotFoundError:
+        logging.error(
+            "PyInstaller não encontrado. Instale com: pip install pyinstaller"
+        )
+        raise RuntimeError(
+            "PyInstaller não encontrado. Instale com: pip install pyinstaller"
+        )
+
+
+def validate_build_result(dist_dir: Path, exe_name: str) -> None:
+    """Valida se o executável foi gerado corretamente."""
+    exe_path = dist_dir / (exe_name + (".exe" if sys.platform == "win32" else ""))
+    if not exe_path.exists() or exe_path.stat().st_size < 1024 * 100:
+        logging.error(
+            "Build falhou: executável não encontrado ou muito pequeno (%s)", exe_path
+        )
+        raise RuntimeError(
+            f"Build falhou: executável não encontrado ou muito pequeno ({exe_path})"
+        )
+    logging.info("✅ Build concluído! Executável em: %s", exe_path)
+
+
+def build() -> None:
+    """
+    Gera um binário único (.exe) do projeto PyGame, incluindo assets e dependências.
+    Segue princípios funcionais, tipagem moderna, arquitetura modular e melhores práticas para PyInstaller 5.x+ e PyGame 2.6.
+    Raises:
+        FileNotFoundError: Se arquivos essenciais estiverem ausentes.
+        RuntimeError: Se o build falhar ou PyInstaller não estiver instalado.
+    """
+    base_dir = Path(__file__).parent.parent.resolve()
+    src_dir = base_dir / "src"
+    main_py = base_dir / "main.py"
+    assets_dir = src_dir / "assets"
+    dist_dir = base_dir / "dist"
+    build_dir = base_dir / "build"
+    config = BuildConfig(
+        main_py=main_py,
+        assets_dir=assets_dir,
+        hidden_imports=(
+            "pygame",
+            "src.core.state",
+            "src.components.thermometer",
+            "src.components.control_panel",
+            "src.components.material_display",
+            "src.interface.manager",
+            "src.utils.temperature_converter",
+            "src.config.settings",
+        ),
+        dist_dir=dist_dir,
+        build_dir=build_dir,
+    )
+    # Validação de pré-condições
+    validate_paths([(config.assets_dir, "src/assets/"), (config.main_py, "main.py")])
+    if not is_pyinstaller_installed():
+        logging.error(
+            "PyInstaller não está instalado. Instale com: pip install pyinstaller"
+        )
+        raise RuntimeError(
+            "PyInstaller não está instalado. Instale com: pip install pyinstaller"
+        )
+    # Limpeza de builds anteriores
+    clean_previous_builds(config.dist_dir, config.build_dir)
+    # Construção do comando e execução do build
+    cmd = build_pyinstaller_command(config)
+    run_build(cmd)
+    # Validação do resultado final
+    validate_build_result(config.dist_dir, config.exe_name)

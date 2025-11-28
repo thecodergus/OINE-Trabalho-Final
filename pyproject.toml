@@ -1,20 +1,13 @@
 [project]
 name = "trabalho-final"
 version = "0.1.0"
-description = "Add your description here"
+description = "Jogo educativo em Python 3.13+ com PyGame 2.6, distribuído como binário standalone via PyInstaller"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = [
-    "pygame>=2.6.1",
-]
+dependencies = ["pygame>=2.6.1"]
 
-[dependency-groups]
-dev = [
-    "aider-install>=0.2.0",
-    "black>=25.11.0",
-    "pyinstaller>=6.16.0",
-    "pytest>=9.0.1",
-]
+[project.optional-dependencies]
+build = ["pyinstaller>=6.16.0"]
 
 [project.scripts]
 build-bin = "build_bin:build"
