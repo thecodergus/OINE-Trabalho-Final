@@ -16,15 +16,19 @@ from ..utils.render_utils import draw_rounded_rect_with_border
 # Enum for material types
 from enum import Enum
 
+
 class MaterialType(Enum):
     """Enumeração para tipos de materiais."""
+
     WATER = "Água"
     GLASS = "Vidro"
     ALUMINUM = "Alumínio"
 
+
 # Enum for material states
 class MaterialState(Enum):
     """Enumeração para estados dos materiais."""
+
     SOLID = "solid"
     LIQUID = "liquid"
     GAS = "gas"
