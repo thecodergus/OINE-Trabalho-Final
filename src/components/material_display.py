@@ -13,9 +13,16 @@ from ..utils.temperature_converter import converter
 from ..utils.font_cache import get_font_by_name
 from ..utils.render_utils import draw_rounded_rect_with_border
 
-# Enum for material states
+# Enum for material types
 from enum import Enum
 
+class MaterialType(Enum):
+    """Enumeração para tipos de materiais."""
+    WATER = "Água"
+    GLASS = "Vidro"
+    ALUMINUM = "Alumínio"
+
+# Enum for material states
 class MaterialState(Enum):
     """Enumeração para estados dos materiais."""
     SOLID = "solid"
@@ -38,19 +45,19 @@ class MaterialDisplay:
         """Define melting and boiling points for materials to determine states."""
         # Standard material points in Celsius
         # These values are approximated for educational purposes
-        if self.nome == "Água":
+        if self.nome == MaterialType.WATER.value:
             return {
                 MaterialState.SOLID: -0.1,  # Water freezes at 0°C
                 MaterialState.LIQUID: 0.1,  # Water melts at 0°C (min liquid)
                 MaterialState.GAS: 100.0,  # Water boils at 100°C (gas state)
             }
-        elif self.nome == "Vidro":
+        elif self.nome == MaterialType.GLASS.value:
             return {
                 MaterialState.SOLID: 1000.0,  # Approximate melting point of glass
                 MaterialState.LIQUID: 1500.0,  # Approximate melting point
                 MaterialState.GAS: float("inf"),  # No boiling in typical conditions
             }
-        elif self.nome == "Alumínio":
+        elif self.nome == MaterialType.ALUMINUM.value:
             return {
                 MaterialState.SOLID: 660.0,  # Aluminum melting point
                 MaterialState.LIQUID: 661.0,  # Aluminum melting (min liquid)
@@ -124,7 +131,7 @@ class MaterialDisplay:
 
         # Based on the material type and current temperature, select appropriate image
         target_image_path = None
-        if self.nome == "Água":
+        if self.nome == MaterialType.WATER.value:
             # Get water state (solid, liquid, gas) based on temperature
             if active_temp_celsius <= self.state_mapping[MaterialState.SOLID]:
                 # Solid state - ice
@@ -136,7 +143,7 @@ class MaterialDisplay:
                 # Gas state - steam
                 target_image_path = "src/assets/Agua-gasosa.png"
 
-        elif self.nome == "Vidro":
+        elif self.nome == MaterialType.GLASS.value:
             # For glass, decide based on temperature
             if active_temp_celsius < self.state_mapping[MaterialState.SOLID]:
                 # Solid state - regular glass
@@ -148,7 +155,7 @@ class MaterialDisplay:
                 # Gas state (very high temperature)
                 target_image_path = "src/assets/Vidro-gasosa.png"
 
-        elif self.nome == "Alumínio":
+        elif self.nome == MaterialType.ALUMINUM.value:
             # For aluminum, decide based on temperature
             if active_temp_celsius < self.state_mapping[MaterialState.SOLID]:
                 # Solid state - solid aluminum
