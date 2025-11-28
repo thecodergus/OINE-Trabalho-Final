@@ -178,4 +178,3 @@ class MaterialDisplay:
         label_x = self.x + (self.w - label.get_width()) // 2
         label_y = self.y + self.h + 10
         surf.blit(label, (label_x, label_y))
-        pygame.draw.rect(surf, border_color, self.rect, 2, border_radius=8)

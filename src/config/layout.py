@@ -16,26 +16,39 @@ from .constants import (
     MATERIAL_COUNT,
 )
 
+
 def calcular_termometro_xs() -> tuple[int, ...]:
-    """Calcula as posições X dos termômetros."""
-    margem_lateral = int(TERMOMETRO_MARGEM_BASE * TERMOMETRO_MARGEM_MULTIPLIER) + TERMOMETRO_MARGEM_OFFSET
+    margem_lateral = (
+        int(TERMOMETRO_MARGEM_BASE * TERMOMETRO_MARGEM_MULTIPLIER)
+        + TERMOMETRO_MARGEM_OFFSET
+    )
     area_util = TELA_LARGURA - 2 * margem_lateral - TERMOMETRO_AREA_REDUCAO
-    espacamento = (area_util - TERMOMETRO_COUNT * TERMOMETRO_DIM[0]) // (TERMOMETRO_COUNT - 1)
+    espacamento = (area_util - TERMOMETRO_COUNT * TERMOMETRO_DIM[0]) // (
+        TERMOMETRO_COUNT - 1
+    )
     xs = [
-        margem_lateral + i * (TERMOMETRO_DIM[0] + espacamento)
+        margem_lateral
+        + i * (TERMOMETRO_DIM[0] + espacamento)
+        + DESLOCAMENTO_TERMOMETROS
         for i in range(TERMOMETRO_COUNT)
     ]
     return tuple(xs)
 
+
 TERMOMETRO_XS = calcular_termometro_xs()
+
 
 def calcular_material_xs() -> list[int]:
     """Calcula as posições X dos materiais centralizados."""
     # Calcular posições centralizadas
     espaco_total = TELA_LARGURA
-    espaco_entre = (
-        espaco_total - (MATERIAL_COUNT * MATERIAL_IMG_DIM[0])
-    ) // (MATERIAL_COUNT + 1)  # MATERIAL_COUNT + 1 espaços: antes, entre, entre, depois
-    return [espaco_entre + i * (MATERIAL_IMG_DIM[0] + espaco_entre) for i in range(MATERIAL_COUNT)]
+    espaco_entre = (espaco_total - (MATERIAL_COUNT * MATERIAL_IMG_DIM[0])) // (
+        MATERIAL_COUNT + 1
+    )  # MATERIAL_COUNT + 1 espaços: antes, entre, entre, depois
+    return [
+        espaco_entre + i * (MATERIAL_IMG_DIM[0] + espaco_entre)
+        for i in range(MATERIAL_COUNT)
+    ]
+
 
 MATERIAL_XS = calcular_material_xs()

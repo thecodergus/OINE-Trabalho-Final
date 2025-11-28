@@ -1,4 +1,4 @@
-"""Constantes numéricas e gerais da aplicação."""
+# """Constantes numéricas e gerais da aplicação."""
 
 # Valores padrão de temperatura
 TEMP_MIN_INICIAL = -100.0
