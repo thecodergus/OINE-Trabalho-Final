@@ -77,11 +77,8 @@ class PainelControle:
         new_min = state.temp_min * 2
         new_max = state.temp_max * 2
 
-        # Aplicar limites
-        # O valor negativo não pode ser maior que -50 (ex: -40, -30 não são permitidos)
-        # Mas pode ser menor (ex: -100, -200, etc.)
-        # O valor positivo pode ser qualquer valor positivo (sem limite inferior nem superior)
-        # new_max não precisa de limite mínimo pois pode ser qualquer valor positivo
+        # Sem limites específicos - valores podem ir além de (-1, 1)
+        # Apenas aplicar limites globais do sistema
 
         # Ajustar o valor ativo proporcionalmente
         if state.temp_max - state.temp_min > 0:
@@ -105,18 +102,8 @@ class PainelControle:
         new_min = state.temp_min / 2
         new_max = state.temp_max / 2
 
-        # Aplicar limites para continuar até chegar a (-50, 50)
-        # O valor negativo deve se aproximar de -50 (mas não ultrapassar para valores mais positivos)
-        # Se o valor negativo for maior que -50 (ex: -25), deve ficar em -50
-        # Se o valor negativo for menor que -50 (ex: -100), dividir por 2 o aproxima de -50
-        if new_min > TEMP_MIN_LIMITE:  # Se for maior que -50 (ex: -25)
-            new_min = TEMP_MIN_LIMITE   # Fica em -50
-
-        # O valor positivo deve se aproximar de 50 (mas não ultrapassar para valores menores)
-        # Se o valor positivo for menor que 50 (ex: 25), deve ficar em 50
-        # Se o valor positivo for maior que 50 (ex: 100), dividir por 2 o aproxima de 50
-        if new_max < 50.0:  # Se for menor que 50 (ex: 25)
-            new_max = 50.0   # Fica em 50
+        # Sem limites específicos - dividir normalmente por 2
+        # Os valores podem ir além do limite original
 
         # Ajustar o valor ativo proporcionalmente
         if state.temp_max - state.temp_min > 0:

@@ -88,11 +88,6 @@ class Termometro:
             if self.escala == TemperatureScale.KELVIN and novo_valor < 0:
                 return None
 
-            # Verificar limite mínimo global convertido
-            from ..config.settings import TEMP_MIN_LIMITE
-            if valor_celsius < TEMP_MIN_LIMITE:
-                return None
-
             return AppState(
                 temp_min=state.temp_min,
                 temp_max=state.temp_max,

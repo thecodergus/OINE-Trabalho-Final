@@ -10,7 +10,7 @@ BASE_MIN = -100.0
 BASE_MAX = 100.0
 
 # Limites para os valores de temperatura
-TEMP_MIN_LIMITE = -50.0
+TEMP_MIN_LIMITE = float('-inf')  # No lower limit
 TEMP_MAX_LIMITE = float('inf')  # No upper limit for positive temperatures
 
 # Dimensões da tela
