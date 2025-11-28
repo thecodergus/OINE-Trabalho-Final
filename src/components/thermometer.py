@@ -4,6 +4,7 @@ from ..core.state import AppState
 from ..temperature_types import TemperatureScale
 from .thermometer_renderer import TermometroRenderer
 from ..config.settings import THUMB_RAIO
+from ..utils.temperature_converter import converter
 
 
 class Termometro:
@@ -73,18 +74,23 @@ class Termometro:
         if state.arrastando == self.escala.value and getattr(event, "pos", None):
             mouse_x, mouse_y = event.pos
             novo_valor = self.y_para_valor(mouse_y, state.temp_min, state.temp_max)
-            novo_valor = state.clamp_valor(novo_valor)
 
-            # Verificar se está tentando aumentar além do limite máximo
-            if novo_valor > state.valor_ativo and not state.pode_aumentar(
-                novo_valor
-            ):
+            # Converter o novo valor para Celsius para verificar os limites globais
+            if self.escala == TemperatureScale.KELVIN:
+                valor_celsius = converter(novo_valor, TemperatureScale.KELVIN, TemperatureScale.CELSIUS)
+            elif self.escala == TemperatureScale.FAHRENHEIT:
+                valor_celsius = converter(novo_valor, TemperatureScale.FAHRENHEIT, TemperatureScale.CELSIUS)
+            else:  # Celsius
+                valor_celsius = novo_valor
+
+            # Verificar limites específicos da escala
+            # Kelvin não pode ser menor que 0 (zero absoluto)
+            if self.escala == TemperatureScale.KELVIN and novo_valor < 0:
                 return None
 
-            # Verificar se está tentando diminuir além do limite mínimo
-            if novo_valor < state.valor_ativo and not state.pode_diminuir(
-                novo_valor
-            ):
+            # Verificar limite mínimo global convertido
+            from ..config.settings import TEMP_MIN_LIMITE
+            if valor_celsius < TEMP_MIN_LIMITE:
                 return None
 
             return AppState(
@@ -102,11 +108,12 @@ class Termometro:
         y = max(self.renderer.y, min(self.renderer.y + self.renderer.h, y))
         ratio = (self.renderer.y + self.renderer.h - y) / self.renderer.h
 
-        # Converter os limites para a escala deste termômetro
-        temp_min_convertido = self.renderer.converter_para_escala(temp_min, TemperatureScale.CELSIUS, self.escala)
-        temp_max_convertido = self.renderer.converter_para_escala(temp_max, TemperatureScale.CELSIUS, self.escala)
+        # Usar a mesma proporção para todos os termômetros
+        # Calcular o valor em Celsius baseado na proporção
+        valor_celsius = temp_min + ratio * (temp_max - temp_min)
 
-        return temp_min_convertido + ratio * (temp_max_convertido - temp_min_convertido)
+        # Converter para a escala deste termômetro
+        return self.renderer.converter_para_escala(valor_celsius, TemperatureScale.CELSIUS, self.escala)
 
     def render(self, surf: pygame.Surface, state: AppState) -> None:
         self.renderer.render(surf, state)

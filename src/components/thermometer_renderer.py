@@ -70,11 +70,24 @@ class TermometroRenderer:
         return int(self.y + self.h - ratio * self.h)
 
     def thumb_pos(self, state: AppState) -> Tuple[int, int]:
-        valor = state.valores()[self.escala]
-        # Obter os limites atuais convertidos para esta escala
-        temp_min_convertido = self.converter_para_escala(state.temp_min, TemperatureScale.CELSIUS, self.escala)
-        temp_max_convertido = self.converter_para_escala(state.temp_max, TemperatureScale.CELSIUS, self.escala)
-        y = self.valor_para_y(valor, temp_min_convertido, temp_max_convertido)
+        # Todos os termômetros devem mostrar a mesma posição proporcional
+        # baseada no valor ativo em relação aos limites atuais
+
+        # Calcular a proporção do valor ativo em relação aos limites globais (em Celsius)
+        if state.temp_max - state.temp_min == 0:
+            ratio = 0.0
+        else:
+            # Converter o valor ativo para Celsius se necessário
+            valor_celsius = state.valor_ativo
+            if state.escala_ativa == TemperatureScale.KELVIN:
+                valor_celsius = self.converter_para_escala(state.valor_ativo, TemperatureScale.KELVIN, TemperatureScale.CELSIUS)
+            elif state.escala_ativa == TemperatureScale.FAHRENHEIT:
+                valor_celsius = self.converter_para_escala(state.valor_ativo, TemperatureScale.FAHRENHEIT, TemperatureScale.CELSIUS)
+
+            ratio = (valor_celsius - state.temp_min) / (state.temp_max - state.temp_min)
+
+        # Aplicar a mesma proporção a todos os termômetros
+        y = int(self.y + self.h - ratio * self.h)
         x = self.x + self.w // 2
         return (x, y)
 
@@ -135,17 +148,18 @@ class TermometroRenderer:
 
     def _render_fill_level(self, surf: pygame.Surface, state: AppState) -> None:
         """Renderiza o nível de preenchimento do termômetro."""
-        valor = state.valores()[self.escala]
-
-        # Converter os limites para a escala deste termômetro
-        temp_min_convertido = self.converter_para_escala(state.temp_min, TemperatureScale.CELSIUS, self.escala)
-        temp_max_convertido = self.converter_para_escala(state.temp_max, TemperatureScale.CELSIUS, self.escala)
-
-        # Calcular proporção correta dentro da faixa de temperatura atual
-        if temp_max_convertido - temp_min_convertido == 0:
-            nivel = 0
+        # Usar a mesma proporção para todos os termômetros baseada no valor ativo
+        if state.temp_max - state.temp_min == 0:
+            nivel = 0.0
         else:
-            nivel = (valor - temp_min_convertido) / (temp_max_convertido - temp_min_convertido)
+            # Converter o valor ativo para Celsius se necessário
+            valor_celsius = state.valor_ativo
+            if state.escala_ativa == TemperatureScale.KELVIN:
+                valor_celsius = self.converter_para_escala(state.valor_ativo, TemperatureScale.KELVIN, TemperatureScale.CELSIUS)
+            elif state.escala_ativa == TemperatureScale.FAHRENHEIT:
+                valor_celsius = self.converter_para_escala(state.valor_ativo, TemperatureScale.FAHRENHEIT, TemperatureScale.CELSIUS)
+
+            nivel = (valor_celsius - state.temp_min) / (state.temp_max - state.temp_min)
 
         # Garantir que o nível esteja entre 0 e 1
         nivel = max(0.0, min(1.0, nivel))
