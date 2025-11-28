@@ -129,27 +129,24 @@ class MaterialDisplay:
         return surf
 
     @classmethod
-    def _load_image(
-        cls, material_type: MaterialType, state: MaterialState, w: int, h: int
-    ) -> pygame.Surface:
+    def _load_image(cls, material_type, state, w: int, h: int) -> pygame.Surface:
         """
         Carrega e converte a imagem, usando cache. Fallback para placeholder.
-        Corrigido: utiliza caminho relativo e resource_path correto.
         """
         key = (material_type, state)
         if key in cls._image_cache:
             return cls._image_cache[key]
-        path = cls._img_path(material_type, state)  # Ex: 'assets/Agua-solido.png'
-        img_path = resource_path(path)  # NÃO usar abspath!
+        nome_arquivo = cls._img_path(material_type, state)  # Ex: 'Agua-solido.png'
+        caminho = resource_path(f"assets/{nome_arquivo}")
         try:
-            if not os.path.exists(img_path):
-                raise FileNotFoundError(f"Imagem não encontrada: {img_path}")
-            img = pygame.image.load(img_path).convert_alpha()
+            if not os.path.exists(caminho):
+                raise FileNotFoundError(f"Imagem não encontrada: {caminho}")
+            img = pygame.image.load(caminho).convert_alpha()
             img = pygame.transform.scale(img, (w, h))
             cls._image_cache[key] = img
             return img
         except Exception as e:
-            print(f"[MaterialDisplay] Falha ao carregar '{img_path}': {e}")
+            print(f"[MaterialDisplay] Falha ao carregar '{caminho}': {e}")
             placeholder = cls._get_placeholder(w, h)
             cls._image_cache[key] = placeholder
             return placeholder

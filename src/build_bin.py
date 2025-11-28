@@ -58,13 +58,9 @@ def discover_image_files(assets_dir: Path) -> List[Path]:
     return list(chain(assets_dir.rglob("*.png"), assets_dir.rglob("*.jpg")))
 
 
-def build_pyinstaller_command(config: BuildConfig) -> List[str]:
-    """
-    Monta o comando do PyInstaller incluindo todos os arquivos .png e .jpg de assets,
-    preservando a estrutura relativa e tratando caminhos com espaços.
-    """
-    sep: str = ";" if sys.platform == "win32" else ":"
-    cmd: List[str] = [
+def build_pyinstaller_command(config: BuildConfig) -> list[str]:
+    sep = ";" if sys.platform == "win32" else ":"
+    cmd = [
         sys.executable,
         "-m",
         "PyInstaller",
@@ -81,23 +77,11 @@ def build_pyinstaller_command(config: BuildConfig) -> List[str]:
     ]
     for module in config.hidden_imports:
         cmd.extend(["--hidden-import", module])
-
-    # Descoberta funcional dos arquivos de imagem
-    image_files: List[Path] = discover_image_files(config.assets_dir)
-    if not image_files:
-        logging.warning(
-            "Nenhum arquivo .png ou .jpg encontrado em %s", config.assets_dir
-        )
-
-    for img in image_files:
-        # Caminho relativo a partir do diretório assets_dir
-        rel_path: Path = img.relative_to(config.assets_dir)
-        # Destino no bundle: assets/rel_path
-        dest_path: Path = Path("assets") / rel_path
-        # Formatação correta: --add-data=SOURCE;DEST (sem aspas)
-        arg: str = f"--add-data={str(img)}{sep}{dest_path.as_posix()}"
-        cmd.append(arg)
-
+    # Empacota cada imagem de src/assets para assets/
+    for img in discover_image_files(config.assets_dir):
+        rel_path = img.relative_to(config.assets_dir)
+        dest_path = f"assets/{rel_path.as_posix()}"
+        cmd.append(f"--add-data={img}{sep}{dest_path}")
     cmd.append(str(config.main_py))
     return cmd
 
