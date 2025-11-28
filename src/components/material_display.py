@@ -13,6 +13,15 @@ from ..utils.temperature_converter import converter
 from ..utils.font_cache import get_font_by_name
 from ..utils.render_utils import draw_rounded_rect_with_border
 
+# Enum for material states
+from enum import Enum
+
+class MaterialState(Enum):
+    """Enumeração para estados dos materiais."""
+    SOLID = "solid"
+    LIQUID = "liquid"
+    GAS = "gas"
+
 
 class MaterialDisplay:
     def __init__(self, x: int, nome: str, img_path: str) -> None:
@@ -31,27 +40,27 @@ class MaterialDisplay:
         # These values are approximated for educational purposes
         if self.nome == "Água":
             return {
-                "solid": -0.1,  # Water freezes at 0°C
-                "liquid": 0.1,  # Water melts at 0°C (min liquid)
-                "gas": 100.0,  # Water boils at 100°C (gas state)
+                MaterialState.SOLID: -0.1,  # Water freezes at 0°C
+                MaterialState.LIQUID: 0.1,  # Water melts at 0°C (min liquid)
+                MaterialState.GAS: 100.0,  # Water boils at 100°C (gas state)
             }
         elif self.nome == "Vidro":
             return {
-                "solid": 1000.0,  # Approximate melting point of glass
-                "liquid": 1500.0,  # Approximate melting point
-                "gas": float("inf"),  # No boiling in typical conditions
+                MaterialState.SOLID: 1000.0,  # Approximate melting point of glass
+                MaterialState.LIQUID: 1500.0,  # Approximate melting point
+                MaterialState.GAS: float("inf"),  # No boiling in typical conditions
             }
         elif self.nome == "Alumínio":
             return {
-                "solid": 660.0,  # Aluminum melting point
-                "liquid": 661.0,  # Aluminum melting (min liquid)
-                "gas": 2500.0,  # Aluminum boiling point
+                MaterialState.SOLID: 660.0,  # Aluminum melting point
+                MaterialState.LIQUID: 661.0,  # Aluminum melting (min liquid)
+                MaterialState.GAS: 2500.0,  # Aluminum boiling point
             }
         else:
             return {
-                "solid": float("-inf"),
-                "liquid": float("-inf"),
-                "gas": float("inf"),
+                MaterialState.SOLID: float("-inf"),
+                MaterialState.LIQUID: float("-inf"),
+                MaterialState.GAS: float("inf"),
             }
 
     def _load_image(self, img_path: str) -> pygame.Surface:
@@ -117,10 +126,10 @@ class MaterialDisplay:
         target_image_path = None
         if self.nome == "Água":
             # Get water state (solid, liquid, gas) based on temperature
-            if active_temp_celsius <= self.state_mapping["solid"]:
+            if active_temp_celsius <= self.state_mapping[MaterialState.SOLID]:
                 # Solid state - ice
                 target_image_path = "src/assets/Agua-solido.png"
-            elif active_temp_celsius <= self.state_mapping["gas"]:
+            elif active_temp_celsius <= self.state_mapping[MaterialState.GAS]:
                 # Liquid state - water
                 target_image_path = "src/assets/Agua-liquida.png"
             else:
@@ -129,10 +138,10 @@ class MaterialDisplay:
 
         elif self.nome == "Vidro":
             # For glass, decide based on temperature
-            if active_temp_celsius < self.state_mapping["solid"]:
+            if active_temp_celsius < self.state_mapping[MaterialState.SOLID]:
                 # Solid state - regular glass
                 target_image_path = "src/assets/Vidro-solido.png"
-            elif active_temp_celsius < self.state_mapping["gas"]:
+            elif active_temp_celsius < self.state_mapping[MaterialState.GAS]:
                 # Liquid state (molten glass)
                 target_image_path = "src/assets/Vidro-liquida.png"
             else:
@@ -141,10 +150,10 @@ class MaterialDisplay:
 
         elif self.nome == "Alumínio":
             # For aluminum, decide based on temperature
-            if active_temp_celsius < self.state_mapping["solid"]:
+            if active_temp_celsius < self.state_mapping[MaterialState.SOLID]:
                 # Solid state - solid aluminum
                 target_image_path = "src/assets/Aluminio-solido.png"
-            elif active_temp_celsius < self.state_mapping["gas"]:
+            elif active_temp_celsius < self.state_mapping[MaterialState.GAS]:
                 # Liquid state (molten aluminum)
                 target_image_path = "src/assets/Aluminio-liquida.png"
             else:
