@@ -35,9 +35,9 @@ class MaterialDisplay:
 
     def __init__(self, x: int, material_type: MaterialType) -> None:
         self.x: int = x
-        self.y: int = 600
-        self.w: int = 120
-        self.h: int = 88
+        self.y: int = 500
+        self.w: int = 200
+        self.h: int = 200
         self.material_type: MaterialType = material_type
         self.rect: pygame.Rect = pygame.Rect(self.x, self.y, self.w, self.h)
         self._current_state: Optional[MaterialState] = None
@@ -172,11 +172,10 @@ class MaterialDisplay:
         """
         Renderiza o material: imagem, rótulo e borda.
         """
-        if self._current_image:
-            self.update_image(temp_celsius)
-            surf.blit(self._current_image, self.rect)
-            label = font.render(self.material_type.name.capitalize(), True, label_color)
-            label_x = self.x + (self.w - label.get_width()) // 2
-            label_y = self.y + self.h + 10
-            surf.blit(label, (label_x, label_y))
-            pygame.draw.rect(surf, border_color, self.rect, 2, border_radius=8)
+        self.update_image(temp_celsius)
+        surf.blit(self._current_image, self.rect)  # type: ignore
+        label = font.render(self.material_type.name.capitalize(), True, label_color)
+        label_x = self.x + (self.w - label.get_width()) // 2
+        label_y = self.y + self.h + 10
+        surf.blit(label, (label_x, label_y))
+        pygame.draw.rect(surf, border_color, self.rect, 2, border_radius=8)
