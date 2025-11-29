@@ -83,28 +83,27 @@ class MaterialDisplay:
         Função pura: retorna o caminho RELATIVO da imagem para o material e estado.
         Corrigido: retorna sempre a partir de 'assets/', nunca inclui 'src/'.
         """
-        base = "assets"
         match material_type, state:
             case MaterialType.AGUA, MaterialState.SOLIDO:
-                return f"{base}/Agua-solido.png"
+                return "Agua-solido.png"
             case MaterialType.AGUA, MaterialState.LIQUIDO:
-                return f"{base}/Agua-liquida.png"
+                return "Agua-liquida.png"
             case MaterialType.AGUA, MaterialState.GASOSO:
-                return f"{base}/Agua-gasosa.png"
+                return "Agua-gasosa.png"
             case MaterialType.VIDRO, MaterialState.SOLIDO:
-                return f"{base}/Vidro-solido.png"
+                return "Vidro-solido.png"
             case MaterialType.VIDRO, MaterialState.LIQUIDO:
-                return f"{base}/Vidro-liquida.png"
+                return "Vidro-liquida.png"
             case MaterialType.VIDRO, MaterialState.GASOSO:
-                return f"{base}/Vidro-gasosa.png"
+                return "Vidro-gasosa.png"
             case MaterialType.ALUMINIO, MaterialState.SOLIDO:
-                return f"{base}/Aluminio-solido.png"
+                return "Aluminio-solido.png"
             case MaterialType.ALUMINIO, MaterialState.LIQUIDO:
-                return f"{base}/Aluminio-liquida.png"
+                return "Aluminio-liquida.png"
             case MaterialType.ALUMINIO, MaterialState.GASOSO:
-                return f"{base}/Aluminio-gasosa.png"
+                return "Aluminio-gasosa.png"
             case _:
-                return f"{base}/imagem_generica.jpg"
+                return "imagem_generica.jpg"
 
     @classmethod
     def _get_placeholder(cls, w: int, h: int) -> pygame.Surface:

@@ -127,7 +127,7 @@ def build() -> None:
     base_dir = Path(__file__).parent.parent.resolve()
     src_dir = base_dir / "src"
     main_py = base_dir / "main.py"
-    assets_dir = src_dir / "assets"
+    assets_dir = base_dir / "assets"
     dist_dir = base_dir / "dist"
     build_dir = base_dir / "build"
     config = BuildConfig(
