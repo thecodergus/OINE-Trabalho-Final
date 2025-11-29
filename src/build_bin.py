@@ -118,48 +118,26 @@ def validate_build_result(dist_dir: Path, exe_name: str) -> None:
 
 def build() -> None:
     """
-    Gera um binário único (.exe) do projeto PyGame, incluindo assets e dependências.
-    Segue princípios funcionais, tipagem moderna, arquitetura modular e melhores práticas para PyInstaller 5.x+ e PyGame 2.6.
-    Raises:
-        FileNotFoundError: Se arquivos essenciais estiverem ausentes.
-        RuntimeError: Se o build falhar ou PyInstaller não estiver instalado.
+    Gera o binário único (.exe) do projeto, incluindo todos os assets de imagens.
     """
     base_dir = Path(__file__).parent.parent.resolve()
-    src_dir = base_dir / "src"
     main_py = base_dir / "main.py"
     assets_dir = base_dir / "assets"
-    dist_dir = base_dir / "dist"
-    build_dir = base_dir / "build"
-    config = BuildConfig(
-        main_py=main_py,
-        assets_dir=assets_dir,
-        hidden_imports=(
-            "pygame",
-            "src.core.state",
-            "src.components.thermometer",
-            "src.components.control_panel",
-            "src.components.material_display",
-            "src.interface.manager",
-            "src.utils.temperature_converter",
-            "src.utils.load_images",
-            "src.config.settings",
-        ),
-        dist_dir=dist_dir,
-        build_dir=build_dir,
-    )
-    # Validação de pré-condições
-    validate_paths([(config.assets_dir, "src/assets/"), (config.main_py, "main.py")])
-    if not is_pyinstaller_installed():
-        logging.error(
-            "PyInstaller não está instalado. Instale com: pip install pyinstaller"
-        )
-        raise RuntimeError(
-            "PyInstaller não está instalado. Instale com: pip install pyinstaller"
-        )
-    # Limpeza de builds anteriores
-    clean_previous_builds(config.dist_dir, config.build_dir)
-    # Construção do comando e execução do build
-    cmd = build_pyinstaller_command(config)
-    run_build(cmd)
-    # Validação do resultado final
-    validate_build_result(config.dist_dir, config.exe_name)
+    sep = ";" if sys.platform == "win32" else ":"
+    cmd = [
+        sys.executable,
+        "-m",
+        "PyInstaller",
+        "--onefile",
+        "--windowed",
+        "--noconfirm",
+        "--clean",
+        "--name",
+        "trabalho-final",
+    ]
+    # Empacota todas as imagens .png e .jpg da raiz de assets/
+    for img in assets_dir.glob("*.[pj][np]g"):
+        cmd.extend(["--add-data", f"{img}{sep}assets"])
+    cmd.append(str(main_py))
+    print("Executando:", " ".join(str(arg) for arg in cmd))
+    subprocess.run(cmd, check=True)

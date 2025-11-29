@@ -10,14 +10,7 @@ from src.utils.load_images import resource_path
 def carregar_wallpaper(
     path: str, largura: int, altura: int
 ) -> Optional[pygame.Surface]:
-    """
-    Função pura para carregar e redimensionar o wallpaper.
-    Retorna None se o arquivo não existir ou não puder ser carregado.
-    Corrigido: usa caminho relativo e resource_path correto.
-    """
-    abs_path = resource_path(
-        path
-    )  # path já deve ser relativo, ex: 'assets/wallpaper.jpg'
+    abs_path = resource_path(path)
     if not os.path.exists(abs_path):
         print(f"[main] Wallpaper não encontrado: {abs_path}")
         return None

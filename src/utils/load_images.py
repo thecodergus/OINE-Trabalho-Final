@@ -8,10 +8,8 @@ def resource_path(relative_path: str) -> str:
     Retorna o caminho absoluto para o asset, compatível com PyInstaller.
     """
     if hasattr(sys, "_MEIPASS"):
-        # Executando como binário PyInstaller
         base_path = sys._MEIPASS  # type: ignore
     else:
-        # Executando em desenvolvimento
         base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     return os.path.join(base_path, relative_path)
 

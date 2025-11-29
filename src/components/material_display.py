@@ -3,7 +3,7 @@ from typing import ClassVar, Dict, Tuple, Optional
 import pygame
 import os
 
-from utils.load_images import resource_path
+from src.utils.load_images import resource_path
 
 
 class MaterialType(Enum):
