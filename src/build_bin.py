@@ -81,7 +81,7 @@ def build_pyinstaller_command(config: BuildConfig) -> list[str]:
     for img in discover_image_files(config.assets_dir):
         rel_path = img.relative_to(config.assets_dir)
         dest_path = f"assets/{rel_path.as_posix()}"
-        cmd.append(f"--add-data={img}{sep}{dest_path}")
+        cmd.append(f"--add-data='{img}{sep}{dest_path}'")
     cmd.append(str(config.main_py))
     return cmd
 
@@ -137,7 +137,7 @@ def build() -> None:
     ]
     # Empacota todas as imagens .png e .jpg da raiz de assets/
     for img in assets_dir.glob("*.[pj][np]g"):
-        cmd.extend(["--add-data", f"{img}{sep}assets"])
+        cmd.extend(["--add-data", f"'{img}{sep}assets'"])
     cmd.append(str(main_py))
     print("Executando:", " ".join(str(arg) for arg in cmd))
     subprocess.run(cmd, check=True)
